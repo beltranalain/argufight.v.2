@@ -56,6 +56,38 @@ export const adminRouter = createTRPCRouter({
     };
   }),
 
+  // ---- RECENT DEBATES ----
+  recentDebates: adminProcedure
+    .input(z.object({ limit: z.number().int().min(1).max(50).default(10) }))
+    .query(async ({ ctx, input }) => {
+      const debates = await ctx.prisma.debates.findMany({
+        take: input.limit,
+        orderBy: { created_at: "desc" },
+        select: {
+          id: true,
+          topic: true,
+          category: true,
+          status: true,
+          winner_id: true,
+          created_at: true,
+          challenger_id: true,
+          opponent_id: true,
+          users_debates_challenger_idTousers: { select: { id: true, username: true, avatar_url: true } },
+          users_debates_opponent_idTousers: { select: { id: true, username: true, avatar_url: true } },
+        },
+      });
+      return debates.map((d) => ({
+        id: d.id,
+        topic: d.topic,
+        category: d.category,
+        status: d.status,
+        winner_id: d.winner_id,
+        created_at: d.created_at,
+        challenger: d.users_debates_challenger_idTousers,
+        opponent: d.users_debates_opponent_idTousers,
+      }));
+    }),
+
   // ---- USER MANAGEMENT ----
   users: adminProcedure
     .input(

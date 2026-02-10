@@ -130,8 +130,24 @@ export const debateRouter = createTRPCRouter({
         nextCursor = next?.id;
       }
 
-      return { debates, nextCursor };
+      const mapped = debates.map((d) => ({
+        ...d,
+        challenger: d.users_debates_challenger_idTousers,
+        opponent: d.users_debates_opponent_idTousers,
+      }));
+
+      return { debates: mapped, nextCursor };
     }),
+
+  // List debate categories
+  categories: publicProcedure.query(async ({ ctx }) => {
+    const categories = await ctx.prisma.categories.findMany({
+      where: { is_active: true },
+      select: { id: true, name: true, label: true },
+      orderBy: { sort_order: "asc" },
+    });
+    return categories;
+  }),
 
   // Get single debate by ID or slug
   get: publicProcedure

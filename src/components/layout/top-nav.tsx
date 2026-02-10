@@ -16,11 +16,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import {
   Sun,
   Moon,
-  Search,
   User,
   Settings,
   LogOut,
@@ -53,8 +51,8 @@ export function TopNav({ currentPanel }: TopNavProps) {
 
   return (
     <>
-      <header className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl">
-        <div className="flex h-14 items-center justify-between px-4">
+      <nav className="fixed top-0 left-0 right-0 h-16 md:h-20 bg-background/80 backdrop-blur-sm border-b border-border/40 z-50">
+        <div className="h-full px-4 md:px-8 flex items-center justify-between">
           {/* Left: Logo + Mobile Menu */}
           <div className="flex items-center gap-3">
             <Button
@@ -68,36 +66,23 @@ export function TopNav({ currentPanel }: TopNavProps) {
 
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 text-lg font-bold"
+              className="flex items-center text-lg md:text-xl font-bold"
             >
-              <span className="text-electric-blue">ARGU</span>
-              <span className="text-neon-orange">FIGHT</span>
+              <span className="text-electric-blue hover:text-electric-blue/80 transition-colors">
+                ARGU FIGHT
+              </span>
             </Link>
-
-            {currentPanel && (
-              <Badge
-                variant="outline"
-                className="hidden border-electric-blue/30 text-electric-blue md:inline-flex"
-              >
-                {currentPanel}
-              </Badge>
-            )}
           </div>
 
-          {/* Center: Search (desktop) */}
-          <div className="hidden max-w-md flex-1 px-8 md:block">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-muted-foreground"
-              onClick={() => router.push("/debates")}
-            >
-              <Search className="mr-2 h-4 w-4" />
-              Search debates, users, topics...
-            </Button>
-          </div>
+          {/* Center: Panel Title */}
+          {currentPanel && (
+            <h2 className="absolute left-1/2 -translate-x-1/2 text-lg md:text-2xl font-bold text-foreground hidden md:block">
+              {currentPanel}
+            </h2>
+          )}
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Theme Toggle */}
             <Button
               variant="ghost"
@@ -111,16 +96,13 @@ export function TopNav({ currentPanel }: TopNavProps) {
 
             {/* Admin Link */}
             {user?.isAdmin && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hidden h-9 w-9 md:flex"
-                asChild
+              <Link
+                href="/admin"
+                className="hidden md:inline-flex items-center px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-electric-blue hover:text-neon-orange transition-colors border border-electric-blue/30 rounded-lg hover:bg-electric-blue/10"
               >
-                <Link href="/admin">
-                  <Shield className="h-4 w-4" />
-                </Link>
-              </Button>
+                <Shield className="h-3.5 w-3.5 mr-1" />
+                Admin
+              </Link>
             )}
 
             {/* Notifications */}
@@ -144,10 +126,7 @@ export function TopNav({ currentPanel }: TopNavProps) {
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-9 w-9 rounded-full"
-                >
+                <button className="flex items-center gap-3 hover:bg-accent rounded-lg p-2 transition-colors cursor-pointer">
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={user?.avatarUrl || undefined}
@@ -157,7 +136,10 @@ export function TopNav({ currentPanel }: TopNavProps) {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                </Button>
+                  <span className="font-semibold text-foreground hidden sm:block text-sm">
+                    {user?.username}
+                  </span>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>
@@ -234,13 +216,13 @@ export function TopNav({ currentPanel }: TopNavProps) {
                   className="text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log Out
+                  Log Out @{user?.username}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Mobile Navigation Sheet */}
       <MobileNav open={mobileOpen} onOpenChange={setMobileOpen} />
