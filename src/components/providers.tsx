@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,20 +24,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [trpcClientInstance] = useState(() => trpcClient);
 
   return (
-    <trpc.Provider client={trpcClientInstance} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          themes={["dark", "light", "purple"]}
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            {children}
-            <Toaster position="bottom-right" richColors />
-          </TooltipProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <SessionProvider>
+      <trpc.Provider client={trpcClientInstance} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            themes={["dark", "light", "purple"]}
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              {children}
+              <Toaster position="bottom-right" richColors />
+            </TooltipProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </trpc.Provider>
+    </SessionProvider>
   );
 }
