@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { type LucideIcon } from "lucide-react";
 
 interface StatsCardProps {
@@ -9,6 +8,7 @@ interface StatsCardProps {
   description?: string;
   icon: LucideIcon;
   trend?: { value: number; label: string };
+  color?: "blue" | "pink" | "green" | "orange";
   className?: string;
 }
 
@@ -18,36 +18,35 @@ export function StatsCard({
   description,
   icon: Icon,
   trend,
+  color = "blue",
   className = "",
 }: StatsCardProps) {
   return (
-    <Card className={`border-border/50 bg-card/80 ${className}`}>
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold mt-1">{value}</p>
-            {description && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {description}
-              </p>
-            )}
-            {trend && (
-              <p
-                className={`text-xs mt-1 ${
-                  trend.value > 0 ? "text-cyber-green" : trend.value < 0 ? "text-destructive" : "text-muted-foreground"
-                }`}
-              >
-                {trend.value > 0 ? "+" : ""}
-                {trend.value}% {trend.label}
-              </p>
-            )}
-          </div>
-          <div className="rounded-lg bg-muted/50 p-2.5">
-            <Icon className="h-5 w-5 text-muted-foreground" />
-          </div>
+    <div className={`af-stat-card stat-${color} ${className}`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="af-stat-card-title">{title}</span>
+        <div className="af-stat-card-icon">
+          <Icon className="h-5 w-5" />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="af-stat-card-value">{value}</div>
+      {description && (
+        <p className="af-stat-card-desc">{description}</p>
+      )}
+      {trend && (
+        <p
+          className={`text-xs mt-1 ${
+            trend.value > 0
+              ? "text-cyber-green"
+              : trend.value < 0
+                ? "text-destructive"
+                : "text-muted-foreground"
+          }`}
+        >
+          {trend.value > 0 ? "+" : ""}
+          {trend.value}% {trend.label}
+        </p>
+      )}
+    </div>
   );
 }

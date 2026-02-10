@@ -1,30 +1,17 @@
 "use client";
 
 import { trpc } from "@/lib/trpc-client";
-import { StatsCard } from "@/components/admin/stats-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  LayoutDashboard,
-  Megaphone,
-  DollarSign,
-  Eye,
-  MousePointer,
-  FileText,
-  TrendingUp,
-} from "lucide-react";
+import { Megaphone, DollarSign, Eye, MousePointer, TrendingUp, FileText, Plus } from "lucide-react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 
 const campaignStatusColors: Record<string, string> = {
-  PENDING_REVIEW: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30",
-  APPROVED: "bg-electric-blue/10 text-electric-blue border-electric-blue/30",
-  ACTIVE: "bg-cyber-green/10 text-cyber-green border-cyber-green/30",
-  PAUSED: "bg-muted text-muted-foreground",
-  COMPLETED: "bg-muted text-muted-foreground",
-  REJECTED: "bg-destructive/10 text-destructive border-destructive/30",
-  CANCELLED: "bg-destructive/10 text-destructive border-destructive/30",
+  PENDING_REVIEW: "bg-neon-orange text-black",
+  APPROVED: "bg-electric-blue text-black",
+  ACTIVE: "bg-cyber-green text-black",
+  PAUSED: "bg-yellow-500 text-black",
+  COMPLETED: "bg-blue-500 text-white",
+  REJECTED: "bg-red-500 text-white",
+  CANCELLED: "bg-red-500 text-white",
 };
 
 export default function AdvertiserDashboardPage() {
@@ -33,11 +20,21 @@ export default function AdvertiserDashboardPage() {
 
   if (statsLoading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Advertiser Dashboard</h1>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-[32px] font-extrabold text-foreground mb-1">
+            Advertiser Dashboard
+          </h1>
+          <p className="text-sm text-text-secondary">
+            Manage your campaigns, track performance, and reach debaters
+          </p>
+        </div>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-24 rounded-[14px] bg-bg-secondary border border-af-border animate-pulse"
+            />
           ))}
         </div>
       </div>
@@ -52,84 +49,160 @@ export default function AdvertiserDashboardPage() {
         <p className="text-muted-foreground text-sm mb-4">
           Apply to become an advertiser to reach debaters.
         </p>
-        <Button asChild>
-          <Link href="/advertise">Apply Now</Link>
-        </Button>
+        <Link
+          href="/advertise"
+          className="inline-flex items-center px-5 py-2.5 rounded-lg bg-electric-blue text-black font-semibold text-sm hover:bg-[#00b8e6] transition-colors"
+        >
+          Apply Now
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <LayoutDashboard className="h-6 w-6 text-neon-orange" />
-          <h1 className="text-2xl font-bold">Advertiser Dashboard</h1>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-[32px] font-extrabold text-foreground mb-1">
+          Advertiser Dashboard
+        </h1>
+        <p className="text-sm text-text-secondary">
+          Manage your campaigns, track performance, and reach debaters
+        </p>
+      </div>
+
+      {/* Stats Row — 5 columns */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+        <div className="af-stat-card stat-blue">
+          <div className="af-stat-card-title uppercase tracking-wider text-xs mb-2">
+            Active Campaigns
+          </div>
+          <div className="af-stat-card-value">{stats.campaigns}</div>
         </div>
-        <Button asChild>
-          <Link href="/advertiser/campaigns/create">
-            <Megaphone className="mr-2 h-4 w-4" />
+        <div className="af-stat-card stat-green">
+          <div className="af-stat-card-title uppercase tracking-wider text-xs mb-2">
+            Total Impressions
+          </div>
+          <div className="af-stat-card-value">
+            {stats.totalImpressions >= 1000
+              ? `${(stats.totalImpressions / 1000).toFixed(1)}K`
+              : stats.totalImpressions.toLocaleString()}
+          </div>
+        </div>
+        <div className="af-stat-card stat-pink">
+          <div className="af-stat-card-title uppercase tracking-wider text-xs mb-2">
+            Total Clicks
+          </div>
+          <div className="af-stat-card-value">
+            {stats.totalClicks.toLocaleString()}
+          </div>
+        </div>
+        <div className="af-stat-card stat-orange">
+          <div className="af-stat-card-title uppercase tracking-wider text-xs mb-2">
+            CTR
+          </div>
+          <div className="af-stat-card-value">{stats.ctr}%</div>
+        </div>
+        <div className="af-stat-card stat-blue">
+          <div className="af-stat-card-title uppercase tracking-wider text-xs mb-2">
+            Total Spent
+          </div>
+          <div className="af-stat-card-value">
+            ${stats.totalSpent.toFixed(2)}
+          </div>
+        </div>
+      </div>
+
+      {/* Campaigns Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-foreground">Your Campaigns</h2>
+          <Link
+            href="/advertiser/campaigns/create"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-electric-blue text-black font-semibold text-sm hover:bg-[#00b8e6] transition-colors"
+          >
+            <Plus className="h-4 w-4" />
             New Campaign
           </Link>
-        </Button>
-      </div>
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatsCard title="Campaigns" value={stats.campaigns} icon={FileText} />
-        <StatsCard
-          title="Total Budget"
-          value={`$${stats.totalSpent.toFixed(2)}`}
-          icon={DollarSign}
-        />
-        <StatsCard title="Active Contracts" value={stats.activeContracts} icon={TrendingUp} />
-        <StatsCard
-          title="Impressions"
-          value={stats.totalImpressions.toLocaleString()}
-          icon={Eye}
-        />
-        <StatsCard
-          title="Clicks"
-          value={stats.totalClicks.toLocaleString()}
-          icon={MousePointer}
-        />
-        <StatsCard title="CTR" value={`${stats.ctr}%`} icon={TrendingUp} />
-      </div>
-
-      {/* Campaigns list */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3">Your Campaigns</h2>
         {campaignsLoading ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 rounded-xl" />
+              <div
+                key={i}
+                className="h-28 rounded-[12px] bg-bg-secondary border border-af-border animate-pulse"
+              />
             ))}
           </div>
         ) : (campaigns ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            No campaigns yet. Create your first campaign to get started.
-          </p>
+          <div className="text-center py-12 border-2 border-dashed border-af-border rounded-[14px]">
+            <Megaphone className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-60" />
+            <p className="text-base font-bold text-foreground">
+              No Campaigns Yet
+            </p>
+            <p className="text-[13px] text-muted-foreground mt-1 mb-4">
+              Create your first campaign to get started
+            </p>
+            <Link
+              href="/advertiser/campaigns/create"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-electric-blue text-black font-semibold text-sm hover:bg-[#00b8e6] transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              New Campaign
+            </Link>
+          </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {(campaigns ?? []).map((c) => (
               <Link
                 key={c.id}
                 href={`/advertiser/campaigns/${c.id}`}
-                className="flex items-center justify-between rounded-xl border border-border/50 bg-card/80 p-4 hover:border-electric-blue/30 transition-colors"
+                className="block bg-bg-secondary border border-af-border rounded-[12px] p-5 hover:border-electric-blue transition-colors"
               >
-                <div>
-                  <p className="font-medium">{c.name}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className={`text-[10px] ${campaignStatusColors[c.status] ?? ""}`}>
-                      {c.status.replace(/_/g, " ")}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{c.type.replace(/_/g, " ")}</span>
+                {/* Top row: name + badges */}
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-base font-bold text-foreground mb-1">
+                      {c.name}
+                    </h3>
+                    <span className="text-xs text-muted-foreground uppercase">
+                      {c.type.replace(/_/g, " ")}
+                    </span>
                   </div>
+                  <span
+                    className={`inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold ${campaignStatusColors[c.status] ?? "bg-muted text-muted-foreground"}`}
+                  >
+                    {c.status.replace(/_/g, " ")}
+                  </span>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-mono text-neon-orange">${Number(c.budget).toFixed(2)}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {c._count.impressions} imp · {c._count.clicks} clicks
-                  </p>
+
+                {/* Stats row */}
+                <div className="flex gap-6 mb-3">
+                  <div>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider block mb-0.5">
+                      Budget
+                    </span>
+                    <span className="text-[15px] font-bold text-foreground">
+                      ${Number(c.budget).toFixed(2)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider block mb-0.5">
+                      Impressions
+                    </span>
+                    <span className="text-[15px] font-bold text-foreground">
+                      {c._count.impressions.toLocaleString()}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider block mb-0.5">
+                      Clicks
+                    </span>
+                    <span className="text-[15px] font-bold text-foreground">
+                      {c._count.clicks.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}

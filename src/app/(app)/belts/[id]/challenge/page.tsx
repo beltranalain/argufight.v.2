@@ -4,9 +4,6 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc-client";
 import { useSession } from "next-auth/react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Swords, ArrowLeft, Loader2, Check, X } from "lucide-react";
 import Link from "next/link";
@@ -42,9 +39,9 @@ export default function BeltChallengePage({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
+        <div className="h-8 w-64 rounded bg-bg-secondary border border-af-border animate-pulse" />
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          <div key={i} className="h-24 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
         ))}
       </div>
     );
@@ -56,26 +53,27 @@ export default function BeltChallengePage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href={`/belts/${beltId}`}>
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
+        <Link
+          href={`/belts/${beltId}`}
+          className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-bg-tertiary border border-af-border text-foreground hover:border-electric-blue hover:text-electric-blue transition-all"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-[24px] font-extrabold text-foreground flex items-center gap-2">
             <Swords className="h-6 w-6 text-neon-orange" />
             Belt Challenges
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] text-text-secondary">
             Manage incoming and outgoing challenges
           </p>
         </div>
       </div>
 
       {beltChallenges.length === 0 ? (
-        <div className="py-16 text-center">
-          <Swords className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground">No active challenges for this belt.</p>
+        <div className="text-center py-16 border-2 border-dashed border-af-border rounded-[14px]">
+          <Swords className="mx-auto h-12 w-12 text-electric-blue opacity-60 mb-4" />
+          <p className="text-base font-bold text-foreground">No active challenges for this belt.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -87,16 +85,16 @@ export default function BeltChallengePage({
             return (
               <div
                 key={c.id}
-                className="rounded-xl border border-border/50 bg-card/80 p-5"
+                className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden p-5"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">
+                    <span className="inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border border-af-border text-muted-foreground">
                       {isIncoming ? "Incoming" : "Outgoing"}
-                    </Badge>
-                    <Badge variant="outline" className="text-[10px]">
+                    </span>
+                    <span className="inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border border-af-border text-muted-foreground">
                       {c.status}
-                    </Badge>
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {c.belts.name} ({c.belts.type})
                     </span>
@@ -107,7 +105,7 @@ export default function BeltChallengePage({
                 </div>
 
                 {c.debate_topic && (
-                  <p className="text-sm font-medium mb-3">{c.debate_topic}</p>
+                  <p className="text-sm font-medium text-foreground mb-3">{c.debate_topic}</p>
                 )}
 
                 <div className="flex items-center justify-between">
@@ -119,7 +117,7 @@ export default function BeltChallengePage({
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{challenger.username}</p>
+                        <p className="text-sm font-medium text-foreground">{challenger.username}</p>
                         <p className="text-[10px] text-muted-foreground">
                           ELO {challenger.elo_rating}
                         </p>
@@ -133,7 +131,7 @@ export default function BeltChallengePage({
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{holder.username}</p>
+                        <p className="text-sm font-medium text-foreground">{holder.username}</p>
                         <p className="text-[10px] text-muted-foreground">
                           ELO {holder.elo_rating}
                         </p>
@@ -144,8 +142,7 @@ export default function BeltChallengePage({
                   {/* Actions for holder */}
                   {isIncoming && c.status === "PENDING" && (
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
+                      <button
                         onClick={() =>
                           respondMutation.mutate({
                             challengeId: c.id,
@@ -153,17 +150,15 @@ export default function BeltChallengePage({
                           })
                         }
                         disabled={respondMutation.isPending}
-                        className="bg-cyber-green text-black hover:bg-cyber-green/90"
+                        className="inline-flex items-center justify-center h-9 w-9 rounded-[10px] bg-cyber-green text-black font-bold hover:bg-cyber-green/90 transition-colors disabled:opacity-50"
                       >
                         {respondMutation.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <Check className="h-4 w-4" />
                         )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
+                      </button>
+                      <button
                         onClick={() =>
                           respondMutation.mutate({
                             challengeId: c.id,
@@ -171,16 +166,20 @@ export default function BeltChallengePage({
                           })
                         }
                         disabled={respondMutation.isPending}
+                        className="inline-flex items-center justify-center h-9 w-9 rounded-[10px] bg-bg-tertiary border border-af-border text-foreground hover:border-electric-blue hover:text-electric-blue transition-all disabled:opacity-50"
                       >
                         <X className="h-4 w-4" />
-                      </Button>
+                      </button>
                     </div>
                   )}
 
                   {c.debate_id && (
-                    <Button size="sm" variant="outline" asChild>
-                      <Link href={`/debate/${c.debate_id}`}>View Debate</Link>
-                    </Button>
+                    <Link
+                      href={`/debate/${c.debate_id}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-[10px] bg-bg-tertiary border border-af-border text-foreground text-sm font-semibold hover:border-electric-blue hover:text-electric-blue transition-all"
+                    >
+                      View Debate
+                    </Link>
                   )}
                 </div>
               </div>

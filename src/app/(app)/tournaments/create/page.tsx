@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc-client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Trophy, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -67,29 +65,30 @@ export default function CreateTournamentPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/tournaments">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
+        <Link
+          href="/tournaments"
+          className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-bg-tertiary border border-af-border text-foreground hover:border-electric-blue hover:text-electric-blue transition-all"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-[24px] font-extrabold text-foreground flex items-center gap-2">
             <Trophy className="h-6 w-6 text-neon-orange" />
             Create Tournament
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] text-text-secondary">
             Set up a new competition
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card className="border-border/50 bg-card/80">
-          <CardHeader>
-            <CardTitle className="text-base">Basic Info</CardTitle>
-            <CardDescription>Name and describe your tournament</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+          <div className="p-6 border-b border-af-border">
+            <h2 className="text-base font-bold text-foreground">Basic Info</h2>
+            <p className="text-[13px] text-text-secondary">Name and describe your tournament</p>
+          </div>
+          <div className="p-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Tournament Name</Label>
               <Input
@@ -99,6 +98,7 @@ export default function CreateTournamentPage() {
                 placeholder="e.g., Weekly Championship"
                 maxLength={100}
                 required
+                className="bg-bg-tertiary border-af-border"
               />
             </div>
             <div className="space-y-2">
@@ -110,21 +110,22 @@ export default function CreateTournamentPage() {
                 placeholder="What is this tournament about?"
                 maxLength={2000}
                 rows={3}
+                className="bg-bg-tertiary border-af-border"
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-border/50 bg-card/80">
-          <CardHeader>
-            <CardTitle className="text-base">Format & Rules</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+          <div className="p-6 border-b border-af-border">
+            <h2 className="text-base font-bold text-foreground">Format & Rules</h2>
+          </div>
+          <div className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Format</Label>
                 <Select value={format} onValueChange={(v) => setFormat(v as typeof format)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-bg-tertiary border-af-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -140,7 +141,7 @@ export default function CreateTournamentPage() {
                   value={reseedMethod}
                   onValueChange={(v) => setReseedMethod(v as typeof reseedMethod)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-bg-tertiary border-af-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,7 +160,7 @@ export default function CreateTournamentPage() {
                   value={String(maxParticipants)}
                   onValueChange={(v) => setMaxParticipants(Number(v))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-bg-tertiary border-af-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -177,7 +178,7 @@ export default function CreateTournamentPage() {
                   value={String(totalRounds)}
                   onValueChange={(v) => setTotalRounds(Number(v))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-bg-tertiary border-af-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,7 +197,7 @@ export default function CreateTournamentPage() {
                   value={String(roundDuration)}
                   onValueChange={(v) => setRoundDuration(Number(v))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-bg-tertiary border-af-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -216,6 +217,7 @@ export default function CreateTournamentPage() {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   required
+                  className="bg-bg-tertiary border-af-border"
                 />
               </div>
             </div>
@@ -230,6 +232,7 @@ export default function CreateTournamentPage() {
                   setMinElo(e.target.value ? Number(e.target.value) : undefined)
                 }
                 placeholder="No restriction"
+                className="bg-bg-tertiary border-af-border"
               />
             </div>
 
@@ -245,15 +248,15 @@ export default function CreateTournamentPage() {
                 Private tournament (invite only)
               </Label>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-border/50 bg-card/80">
-          <CardHeader>
-            <CardTitle className="text-base">Economy</CardTitle>
-            <CardDescription>Entry fees and prizes (in coins)</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+          <div className="p-6 border-b border-af-border">
+            <h2 className="text-base font-bold text-foreground">Economy</h2>
+            <p className="text-[13px] text-text-secondary">Entry fees and prizes (in coins)</p>
+          </div>
+          <div className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="entry-fee">Entry Fee</Label>
@@ -263,6 +266,7 @@ export default function CreateTournamentPage() {
                   min={0}
                   value={entryFee}
                   onChange={(e) => setEntryFee(Number(e.target.value))}
+                  className="bg-bg-tertiary border-af-border"
                 />
               </div>
               <div className="space-y-2">
@@ -273,24 +277,25 @@ export default function CreateTournamentPage() {
                   min={0}
                   value={prizePool}
                   onChange={(e) => setPrizePool(Number(e.target.value))}
+                  className="bg-bg-tertiary border-af-border"
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Button
+        <button
           type="submit"
           disabled={createMutation.isPending}
-          className="w-full bg-electric-blue text-black hover:bg-electric-blue/90"
+          className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[10px] bg-electric-blue text-black font-bold text-sm hover:bg-[#00b8e6] transition-colors disabled:opacity-50"
         >
           {createMutation.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Trophy className="mr-2 h-4 w-4" />
+            <Trophy className="h-4 w-4" />
           )}
           Create Tournament
-        </Button>
+        </button>
       </form>
     </div>
   );

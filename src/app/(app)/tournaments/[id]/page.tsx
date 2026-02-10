@@ -3,9 +3,6 @@
 import { use } from "react";
 import { trpc } from "@/lib/trpc-client";
 import { useSession } from "next-auth/react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BracketView } from "@/components/tournament/bracket-view";
@@ -75,16 +72,16 @@ export default function TournamentDetailPage({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-96 w-full rounded-xl" />
+        <div className="h-8 w-64 rounded bg-bg-secondary border border-af-border animate-pulse" />
+        <div className="h-48 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
+        <div className="h-96 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
       </div>
     );
   }
 
   if (!tournament) {
     return (
-      <div className="py-16 text-center">
+      <div className="text-center py-16 border-2 border-dashed border-af-border rounded-[14px]">
         <p className="text-muted-foreground">Tournament not found.</p>
       </div>
     );
@@ -106,24 +103,24 @@ export default function TournamentDetailPage({
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/tournaments">
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </Button>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Link
+              href="/tournaments"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-bg-tertiary border border-af-border text-foreground hover:border-electric-blue hover:text-electric-blue transition-all"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <h1 className="text-[24px] font-extrabold text-foreground flex items-center gap-2">
               <Trophy className="h-6 w-6 text-neon-orange" />
               {tournament.name}
             </h1>
-            <Badge
-              variant="outline"
-              className={statusColors[tournament.status] ?? ""}
+            <span
+              className={`inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border ${statusColors[tournament.status] ?? ""}`}
             >
               {tournament.status.replace(/_/g, " ")}
-            </Badge>
+            </span>
           </div>
           {tournament.description && (
-            <p className="text-sm text-muted-foreground ml-12">
+            <p className="text-[13px] text-text-secondary ml-12">
               {tournament.description}
             </p>
           )}
@@ -131,33 +128,33 @@ export default function TournamentDetailPage({
 
         <div className="flex gap-2 shrink-0">
           {canRegister && (
-            <Button
+            <button
               onClick={() => registerMutation.mutate({ tournamentId: id })}
               disabled={registerMutation.isPending}
-              className="bg-cyber-green text-black hover:bg-cyber-green/90"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-cyber-green text-black font-bold text-sm hover:bg-cyber-green/90 transition-colors disabled:opacity-50"
             >
               {registerMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Users className="mr-2 h-4 w-4" />
+                <Users className="h-4 w-4" />
               )}
               Register
               {tournament.entry_fee && tournament.entry_fee > 0
                 ? ` (${tournament.entry_fee} coins)`
                 : ""}
-            </Button>
+            </button>
           )}
           {canUnregister && (
-            <Button
-              variant="outline"
+            <button
               onClick={() => unregisterMutation.mutate({ tournamentId: id })}
               disabled={unregisterMutation.isPending}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-bg-tertiary border border-af-border text-foreground font-semibold text-sm hover:border-electric-blue hover:text-electric-blue transition-all disabled:opacity-50"
             >
               {unregisterMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : null}
               Withdraw
-            </Button>
+            </button>
           )}
         </div>
       </div>
@@ -198,9 +195,9 @@ export default function TournamentDetailPage({
             {tournament.users_tournaments_creator_idTousers.username}
           </Link>
           {isCreator && (
-            <Badge variant="outline" className="ml-1 text-[10px]">
+            <span className="inline-flex ml-1 px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border border-af-border text-muted-foreground">
               You
-            </Badge>
+            </span>
           )}
         </span>
       </div>
@@ -222,8 +219,8 @@ export default function TournamentDetailPage({
         </TabsContent>
 
         <TabsContent value="participants" className="mt-4">
-          <div className="rounded-xl border border-border/50 bg-card/80 overflow-hidden">
-            <div className="grid grid-cols-12 gap-2 border-b border-border/50 bg-muted/30 px-4 py-2 text-xs font-medium text-muted-foreground">
+          <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+            <div className="grid grid-cols-12 gap-2 border-b border-af-border bg-bg-tertiary px-4 py-2 text-xs font-medium text-muted-foreground">
               <div className="col-span-1 text-center">Seed</div>
               <div className="col-span-5">Player</div>
               <div className="col-span-2 text-center">ELO</div>
@@ -234,7 +231,7 @@ export default function TournamentDetailPage({
               <Link
                 key={p.id}
                 href={`/${p.users.username}`}
-                className="grid grid-cols-12 items-center gap-2 px-4 py-3 hover:bg-muted/30 transition-colors border-b border-border/20 last:border-0"
+                className="grid grid-cols-12 items-center gap-2 px-4 py-3 hover:bg-bg-tertiary transition-colors border-b border-af-border last:border-0"
               >
                 <div className="col-span-1 text-center text-sm text-muted-foreground">
                   {p.seed ?? "-"}
@@ -245,11 +242,11 @@ export default function TournamentDetailPage({
                       {p.users.username.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium">{p.users.username}</span>
+                  <span className="text-sm font-medium text-foreground">{p.users.username}</span>
                   {p.user_id === userId && (
-                    <Badge variant="outline" className="text-[10px]">
+                    <span className="inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border border-af-border text-muted-foreground">
                       You
-                    </Badge>
+                    </span>
                   )}
                 </div>
                 <div className="col-span-2 text-center text-sm text-electric-blue font-medium">

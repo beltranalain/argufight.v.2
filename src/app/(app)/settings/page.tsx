@@ -3,16 +3,12 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc-client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Save, Lock, Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -76,10 +72,10 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="h-8 w-40 rounded bg-bg-secondary animate-pulse" />
+        <div className="h-64 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
+        <div className="h-48 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
       </div>
     );
   }
@@ -91,157 +87,159 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-[24px] font-extrabold text-foreground">Settings</h1>
+        <p className="text-[13px] text-text-secondary">
           Manage your account and preferences
         </p>
       </div>
 
       {/* Profile Settings */}
-      <Card className="border-border/50 bg-card/80">
-        <CardHeader>
-          <CardTitle className="text-base">Profile</CardTitle>
-          <CardDescription>Update your public information</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+        <div className="p-6 border-b border-af-border">
+          <h2 className="text-base font-bold text-foreground">Profile</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Update your public information</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <Label className="text-[13px] text-text-secondary mb-1.5 block">Username</Label>
             <Input
-              id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               maxLength={30}
+              className="bg-bg-tertiary border-af-border"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
+          <div>
+            <Label className="text-[13px] text-text-secondary mb-1.5 block">Bio</Label>
             <Textarea
-              id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell people about yourself..."
               maxLength={500}
               rows={3}
+              className="bg-bg-tertiary border-af-border"
             />
-            <p className="text-xs text-muted-foreground">{bio.length}/500</p>
+            <p className="text-[11px] text-muted-foreground mt-1">{bio.length}/500</p>
           </div>
-          <Button
+          <button
             onClick={handleSaveProfile}
             disabled={updateProfile.isPending}
-            className="bg-electric-blue text-black hover:bg-electric-blue/90"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-electric-blue text-black font-bold text-sm hover:bg-[#00b8e6] transition-colors disabled:opacity-50"
           >
             {updateProfile.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
             )}
             Save Profile
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
       {/* Password */}
-      <Card className="border-border/50 bg-card/80">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+        <div className="p-6 border-b border-af-border">
+          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
             <Lock className="h-4 w-4" />
             Password
-          </CardTitle>
-          <CardDescription>Change your password</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password</Label>
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Change your password</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <Label className="text-[13px] text-text-secondary mb-1.5 block">Current Password</Label>
             <div className="relative">
               <Input
-                id="currentPassword"
                 type={showPasswords ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
+                className="bg-bg-tertiary border-af-border"
               />
               <button
                 type="button"
                 onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+          <div>
+            <Label className="text-[13px] text-text-secondary mb-1.5 block">New Password</Label>
             <Input
-              id="newPassword"
               type={showPasswords ? "text" : "password"}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              className="bg-bg-tertiary border-af-border"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+          <div>
+            <Label className="text-[13px] text-text-secondary mb-1.5 block">Confirm New Password</Label>
             <Input
-              id="confirmPassword"
               type={showPasswords ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              className="bg-bg-tertiary border-af-border"
             />
           </div>
-          <Button
+          <button
             onClick={handleChangePassword}
             disabled={changePassword.isPending || !currentPassword || !newPassword}
-            variant="outline"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-bg-tertiary border border-af-border text-foreground font-semibold text-sm hover:border-electric-blue hover:text-electric-blue transition-all disabled:opacity-50"
           >
             {changePassword.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Lock className="mr-2 h-4 w-4" />
+              <Lock className="h-4 w-4" />
             )}
             Change Password
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
       {/* Security */}
-      <Card className="border-border/50 bg-card/80">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+        <div className="p-6 border-b border-af-border">
+          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
             <Shield className="h-4 w-4" />
             Security
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+          </h2>
+        </div>
+        <div className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Two-Factor Authentication</p>
+              <p className="text-sm font-semibold text-foreground">Two-Factor Authentication</p>
               <p className="text-xs text-muted-foreground">
                 Add an extra layer of security
               </p>
             </div>
-            <Badge
-              variant="outline"
-              className={
+            <span
+              className={`inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold ${
                 user.totp_enabled
-                  ? "border-cyber-green/30 text-cyber-green"
-                  : "border-border text-muted-foreground"
-              }
+                  ? "bg-cyber-green/15 text-cyber-green"
+                  : "bg-muted text-muted-foreground"
+              }`}
             >
               {user.totp_enabled ? "Enabled" : "Disabled"}
-            </Badge>
+            </span>
           </div>
-          <Separator />
+          <div className="border-t border-af-border" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Subscription</p>
+              <p className="text-sm font-semibold text-foreground">Subscription</p>
               <p className="text-xs text-muted-foreground">
                 {sub ? `${sub.tier} — ${sub.status}` : "Free tier"}
               </p>
             </div>
-            <Button variant="outline" size="sm" asChild>
-              <a href="/upgrade">Manage</a>
-            </Button>
+            <Link
+              href="/upgrade"
+              className="inline-flex items-center px-4 py-1.5 rounded-lg bg-bg-tertiary border border-af-border text-sm font-semibold text-foreground hover:border-electric-blue hover:text-electric-blue transition-all"
+            >
+              Manage
+            </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

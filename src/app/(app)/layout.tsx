@@ -18,7 +18,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen bg-background">
       <TopNav currentPanel="THE ARENA" />
-      <main className="overflow-auto">{children}</main>
+      <main className="pt-16 overflow-auto">{children}</main>
       <PushManager />
       <NotificationTicker />
     </div>

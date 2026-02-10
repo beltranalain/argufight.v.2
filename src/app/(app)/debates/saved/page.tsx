@@ -3,7 +3,6 @@
 import { trpc } from "@/lib/trpc-client";
 import { DebateCard } from "@/components/debate/debate-card";
 import { DebateListSkeleton } from "@/components/skeletons/debate-card-skeleton";
-import { Button } from "@/components/ui/button";
 import { Bookmark, Loader2 } from "lucide-react";
 
 export default function SavedDebatesPage() {
@@ -18,11 +17,11 @@ export default function SavedDebatesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+        <h1 className="text-[24px] font-extrabold text-foreground flex items-center gap-2">
           <Bookmark className="h-5 w-5" />
           Saved Debates
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-text-secondary">
           Debates you&apos;ve bookmarked for later
         </p>
       </div>
@@ -30,10 +29,10 @@ export default function SavedDebatesPage() {
       {isLoading ? (
         <DebateListSkeleton count={6} />
       ) : debates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Bookmark className="h-10 w-10 text-muted-foreground" />
-          <p className="mt-3 font-medium">No saved debates</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="text-center py-16 border-2 border-dashed border-af-border rounded-[14px]">
+          <Bookmark className="w-10 h-10 mx-auto mb-3 text-electric-blue opacity-60" />
+          <p className="text-base font-bold text-foreground">No saved debates</p>
+          <p className="text-[13px] text-muted-foreground mt-1">
             Click the bookmark icon on any debate to save it here.
           </p>
         </div>
@@ -46,16 +45,14 @@ export default function SavedDebatesPage() {
           </div>
           {hasNextPage && (
             <div className="flex justify-center">
-              <Button
-                variant="outline"
+              <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-bg-tertiary border border-af-border text-foreground text-sm font-semibold hover:border-electric-blue hover:text-electric-blue transition-all disabled:opacity-50"
               >
-                {isFetchingNextPage ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
+                {isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" />}
                 Load More
-              </Button>
+              </button>
             </div>
           )}
         </>

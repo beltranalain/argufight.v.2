@@ -27,10 +27,14 @@ export function ProfilePanel() {
   const winRate = totalDebates > 0 ? Math.round((wins / totalDebates) * 100) : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="bg-bg-secondary border border-af-border rounded-[14px] p-6 overflow-hidden">
+      <h2 className="text-[22px] font-extrabold text-foreground mb-4">
+        Your Profile
+      </h2>
+
       {/* Profile Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <Avatar className="h-14 w-14">
+      <div className="flex items-center gap-3 mb-5">
+        <Avatar className="h-12 w-12">
           <AvatarImage src={user?.avatarUrl || undefined} alt={user?.username || ""} />
           <AvatarFallback className="bg-electric-blue/20 text-electric-blue font-bold">
             {initials}
@@ -39,10 +43,10 @@ export function ProfilePanel() {
         <div>
           <h3 className="text-lg font-bold text-foreground">{user?.username}</h3>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center rounded-full bg-electric-blue/20 px-2 py-0.5 text-xs font-medium text-electric-blue">
+            <span className="inline-flex items-center rounded-md px-2.5 py-[3px] text-[11px] font-bold bg-electric-blue/20 text-electric-blue">
               ELO: {profile?.elo_rating ?? user?.eloRating ?? 1200}
             </span>
-            <span className="inline-flex items-center rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-400">
+            <span className="inline-flex items-center rounded-md px-2.5 py-[3px] text-[11px] font-bold bg-cyan-500/15 text-cyan-400">
               Coins: {(profile?.coins ?? user?.coins ?? 0).toLocaleString()}
             </span>
           </div>
@@ -50,46 +54,38 @@ export function ProfilePanel() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-border bg-card p-4 hover:border-electric-blue/30 transition-colors">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-electric-blue mb-1">
-              {totalDebates}
-            </div>
-            <div className="text-xs text-muted-foreground">Total</div>
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="bg-bg-tertiary border border-af-border rounded-[10px] p-4 text-center transition-all hover:border-electric-blue/30">
+          <div className="text-[28px] font-extrabold text-electric-blue mb-0.5">
+            {totalDebates}
           </div>
+          <div className="text-xs text-text-secondary">Total</div>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4 hover:border-electric-blue/30 transition-colors">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-cyber-green mb-1">
-              {wins}
-            </div>
-            <div className="text-xs text-muted-foreground">Wins</div>
+        <div className="bg-bg-tertiary border border-af-border rounded-[10px] p-4 text-center transition-all hover:border-electric-blue/30">
+          <div className="text-[28px] font-extrabold text-cyber-green mb-0.5">
+            {wins}
           </div>
+          <div className="text-xs text-text-secondary">Wins</div>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4 hover:border-electric-blue/30 transition-colors">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-neon-orange mb-1">
-              {losses}
-            </div>
-            <div className="text-xs text-muted-foreground">Losses</div>
+        <div className="bg-bg-tertiary border border-af-border rounded-[10px] p-4 text-center transition-all hover:border-electric-blue/30">
+          <div className="text-[28px] font-extrabold text-neon-orange mb-0.5">
+            {losses}
           </div>
+          <div className="text-xs text-text-secondary">Losses</div>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4 hover:border-electric-blue/30 transition-colors">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-hot-pink mb-1">
-              {winRate}%
-            </div>
-            <div className="text-xs text-muted-foreground">Win Rate</div>
+        <div className="bg-bg-tertiary border border-af-border rounded-[10px] p-4 text-center transition-all hover:border-electric-blue/30">
+          <div className="text-[28px] font-extrabold text-hot-pink mb-0.5">
+            {winRate}%
           </div>
+          <div className="text-xs text-text-secondary">Win Rate</div>
         </div>
       </div>
 
       {/* Recent Debates */}
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="bg-bg-tertiary border border-af-border rounded-[10px] p-4">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-foreground">Recent Debates</h4>
-          <div className="flex gap-2">
+          <span className="text-sm font-bold text-foreground">Recent Debates</span>
+          <div className="flex gap-3">
             <Link
               href="/debates/history"
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -109,7 +105,7 @@ export function ProfilePanel() {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-electric-blue border-t-transparent" />
           </div>
         ) : !recentDebates?.debates?.length ? (
-          <div className="text-center py-6 border-2 border-dashed border-border rounded-lg">
+          <div className="text-center py-6 border-2 border-dashed border-af-border rounded-lg">
             <svg
               className="w-8 h-8 mx-auto mb-2 text-muted-foreground"
               fill="none"
@@ -136,42 +132,42 @@ export function ProfilePanel() {
                 <Link
                   key={debate.id}
                   href={`/debate/${debate.id}`}
-                  className="block p-3 rounded-lg border border-border bg-accent/50 hover:border-electric-blue/50 transition-colors"
+                  className="af-debate-row"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground truncate mb-1">
                         {debate.topic}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5 text-[11px] text-text-secondary">
                         <span>{debate.category}</span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col items-end gap-1 shrink-0">
                       {debate.winner_id ? (
                         isWinner ? (
-                          <span className="inline-flex items-center rounded-full bg-cyber-green px-2 py-0.5 text-xs font-medium text-black">
+                          <span className="inline-flex px-2.5 py-[2px] rounded-[5px] text-[11px] font-bold bg-cyber-green text-black">
                             Won
                           </span>
                         ) : (
-                          <span className="inline-flex items-center rounded-full bg-neon-orange px-2 py-0.5 text-xs font-medium text-black">
+                          <span className="inline-flex px-2.5 py-[2px] rounded-[5px] text-[11px] font-bold bg-neon-orange text-black">
                             Lost
                           </span>
                         )
                       ) : debate.status === "ACTIVE" ? (
-                        <span className="inline-flex items-center rounded-full bg-electric-blue px-2 py-0.5 text-xs font-medium text-white">
+                        <span className="inline-flex px-2.5 py-[2px] rounded-[5px] text-[11px] font-bold bg-electric-blue text-white">
                           Ongoing
                         </span>
                       ) : debate.status === "COMPLETED" ? (
-                        <span className="inline-flex items-center rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-black">
+                        <span className="inline-flex px-2.5 py-[2px] rounded-[5px] text-[11px] font-bold bg-yellow-500 text-black">
                           Awaiting Verdict
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        <span className="inline-flex px-2.5 py-[2px] rounded-[5px] text-[11px] font-bold bg-muted text-muted-foreground">
                           {debate.status}
                         </span>
                       )}
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
                         {new Date(debate.created_at).toLocaleDateString()}
                       </span>
                     </div>

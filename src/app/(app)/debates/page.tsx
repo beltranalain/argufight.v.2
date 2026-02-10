@@ -4,7 +4,6 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc-client";
 import { DebateCard } from "@/components/debate/debate-card";
 import { DebateListSkeleton } from "@/components/skeletons/debate-card-skeleton";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { CreateDebateDialog } from "@/components/debate/debate-form";
 
@@ -71,18 +69,18 @@ export default function DebatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Debates</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-[24px] font-extrabold text-foreground">Debates</h1>
+          <p className="text-[13px] text-text-secondary">
             Browse and join debates on any topic
           </p>
         </div>
-        <Button
+        <button
           onClick={() => setShowCreate(true)}
-          className="bg-electric-blue text-black hover:bg-electric-blue/90"
+          className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-electric-blue text-black font-bold text-sm hover:bg-[#00b8e6] transition-colors"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           New Debate
-        </Button>
+        </button>
       </div>
 
       {/* Filters */}
@@ -93,11 +91,11 @@ export default function DebatesPage() {
             placeholder="Search debates..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-bg-tertiary border-af-border"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-[160px] bg-bg-tertiary border-af-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -109,7 +107,7 @@ export default function DebatesPage() {
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[140px] bg-bg-tertiary border-af-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -121,7 +119,7 @@ export default function DebatesPage() {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[140px] bg-bg-tertiary border-af-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -139,19 +137,28 @@ export default function DebatesPage() {
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Filters:</span>
           {category !== "all" && (
-            <Badge variant="secondary" className="text-xs cursor-pointer" onClick={() => setCategory("all")}>
+            <button
+              onClick={() => setCategory("all")}
+              className="inline-flex px-2.5 py-1 rounded-md bg-bg-tertiary border border-af-border text-xs text-foreground hover:border-electric-blue transition-colors"
+            >
               {category} &times;
-            </Badge>
+            </button>
           )}
           {status !== "all" && (
-            <Badge variant="secondary" className="text-xs cursor-pointer" onClick={() => setStatus("all")}>
+            <button
+              onClick={() => setStatus("all")}
+              className="inline-flex px-2.5 py-1 rounded-md bg-bg-tertiary border border-af-border text-xs text-foreground hover:border-electric-blue transition-colors"
+            >
               {status} &times;
-            </Badge>
+            </button>
           )}
           {search && (
-            <Badge variant="secondary" className="text-xs cursor-pointer" onClick={() => setSearch("")}>
+            <button
+              onClick={() => setSearch("")}
+              className="inline-flex px-2.5 py-1 rounded-md bg-bg-tertiary border border-af-border text-xs text-foreground hover:border-electric-blue transition-colors"
+            >
               &quot;{search}&quot; &times;
-            </Badge>
+            </button>
           )}
         </div>
       )}
@@ -160,18 +167,19 @@ export default function DebatesPage() {
       {isLoading ? (
         <DebateListSkeleton count={6} />
       ) : debates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-lg font-medium">No debates found</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="text-center py-16 border-2 border-dashed border-af-border rounded-[14px]">
+          <Search className="w-12 h-12 mx-auto mb-3 text-electric-blue opacity-60" />
+          <p className="text-base font-bold text-foreground">No debates found</p>
+          <p className="text-[13px] text-muted-foreground mt-1 mb-4">
             Try adjusting your filters or create a new debate.
           </p>
-          <Button
+          <button
             onClick={() => setShowCreate(true)}
-            className="mt-4 bg-electric-blue text-black hover:bg-electric-blue/90"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-electric-blue text-black font-bold text-sm hover:bg-[#00b8e6] transition-colors"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Create Debate
-          </Button>
+          </button>
         </div>
       ) : (
         <>
@@ -183,20 +191,14 @@ export default function DebatesPage() {
 
           {hasNextPage && (
             <div className="flex justify-center pt-4">
-              <Button
-                variant="outline"
+              <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-bg-tertiary border border-af-border text-foreground text-sm font-semibold hover:border-electric-blue hover:text-electric-blue transition-all disabled:opacity-50"
               >
-                {isFetchingNextPage ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  "Load More"
-                )}
-              </Button>
+                {isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isFetchingNextPage ? "Loading..." : "Load More"}
+              </button>
             </div>
           )}
         </>

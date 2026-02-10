@@ -35,15 +35,18 @@ export function ArenaPanel() {
   const activeDebates = activeData?.debates ?? [];
 
   return (
-    <div className="space-y-8">
-      {/* Open Challenges Section */}
-      <div className="rounded-xl border border-border bg-card p-6 mt-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          Open Challenges
-        </h2>
-        <p className="text-muted-foreground text-sm mb-4">
+    <>
+      {/* Open Challenges Panel */}
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] p-6 overflow-hidden">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-[22px] font-extrabold text-foreground">
+            Open Challenges
+          </h2>
+        </div>
+        <p className="text-[13px] text-text-secondary mb-4">
           Debates waiting for opponents
         </p>
+
         <div
           className="max-h-[60vh] overflow-y-auto pr-2"
           style={{ scrollBehavior: "smooth" }}
@@ -53,14 +56,14 @@ export function ArenaPanel() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-24 rounded-lg bg-accent animate-pulse"
+                  className="h-24 rounded-lg bg-bg-tertiary animate-pulse"
                 />
               ))}
             </div>
           ) : waitingDebates.length === 0 ? (
-            <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+            <div className="text-center py-10 border-2 border-dashed border-af-border rounded-xl">
               <svg
-                className="w-12 h-12 mx-auto mb-3 text-muted-foreground"
+                className="w-12 h-12 mx-auto mb-3 text-electric-blue opacity-60"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -68,15 +71,15 @@ export function ArenaPanel() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  strokeWidth={1.5}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
-              <p className="text-sm font-semibold text-foreground">
+              <p className="text-base font-bold text-foreground">
                 No Open Challenges
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Be the first to create a debate!
+              <p className="text-[13px] text-muted-foreground mt-1">
+                There are no debates waiting for opponents right now
               </p>
             </div>
           ) : (
@@ -85,28 +88,28 @@ export function ArenaPanel() {
                 <Link
                   key={debate.id}
                   href={`/debate/${debate.id}`}
-                  className="block p-4 rounded-lg border border-border bg-accent/50 hover:border-electric-blue/50 transition-colors"
+                  className="af-debate-row"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate mb-1">
+                      <p className="text-xs font-semibold text-foreground truncate mb-1">
                         {debate.topic}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                      <div className="flex items-center gap-2 text-[11px] text-text-secondary">
+                        <span className="inline-flex px-[7px] py-[1px] rounded text-[10px] font-bold uppercase bg-electric-blue/20 text-electric-blue">
                           {debate.category}
                         </span>
                         <span>
                           {debate.total_rounds} rounds
                         </span>
-                        <span>•</span>
+                        <span>&bull;</span>
                         <span>
                           by {debate.challenger?.username || "Unknown"}
                         </span>
                       </div>
                     </div>
                     {debate.challenger_id !== user?.id && (
-                      <span className="inline-flex items-center rounded-lg bg-electric-blue px-3 py-1.5 text-xs font-semibold text-black">
+                      <span className="inline-flex items-center rounded-lg bg-electric-blue px-3 py-1.5 text-xs font-bold text-black">
                         Accept
                       </span>
                     )}
@@ -118,55 +121,49 @@ export function ArenaPanel() {
         </div>
       </div>
 
-      {/* Live Battles Section */}
-      <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div>
-            <h3 className="text-2xl font-bold text-foreground mb-1">
-              Live Battles
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              All ongoing debates
-            </p>
-          </div>
+      {/* Live Battles Panel */}
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] p-6 overflow-hidden">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-[22px] font-extrabold text-foreground">
+            Live Battles
+          </h2>
+        </div>
+        <p className="text-[13px] text-text-secondary mb-4">
+          Your active debate and all ongoing debates
+        </p>
 
-          {/* Category Filter */}
-          <div className="flex items-center gap-2">
-            <label
-              htmlFor="category-filter"
-              className="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >
-              Category:
-            </label>
-            <select
-              id="category-filter"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-border bg-card text-foreground text-sm font-medium cursor-pointer hover:border-electric-blue/50 focus:outline-none focus:ring-2 focus:ring-electric-blue/50 transition-colors min-w-[150px]"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category === "ALL" ? "All Categories" : category}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Category Filter */}
+        <div className="flex items-center gap-2.5 mb-4">
+          <span className="text-[13px] text-text-secondary font-medium">
+            Category:
+          </span>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="af-filter-select"
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category === "ALL" ? "All Categories" : category}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Active Debates Grid */}
         {isLoadingActive ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-32 rounded-lg bg-accent animate-pulse"
+                className="h-32 rounded-lg bg-bg-tertiary animate-pulse"
               />
             ))}
           </div>
         ) : activeDebates.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+          <div className="text-center py-12 border-2 border-dashed border-af-border rounded-xl">
             <svg
-              className="w-16 h-16 mx-auto mb-3 text-muted-foreground"
+              className="w-12 h-12 mx-auto mb-3 text-electric-blue opacity-60"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -174,14 +171,14 @@ export function ArenaPanel() {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
               />
             </svg>
-            <p className="text-sm font-semibold text-foreground">
+            <p className="text-base font-bold text-foreground">
               No Active Debates
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[13px] text-muted-foreground mt-1">
               Be the first to start a debate!
             </p>
           </div>
@@ -195,20 +192,20 @@ export function ArenaPanel() {
                 <Link
                   key={debate.id}
                   href={`/debate/${debate.id}`}
-                  className="block p-4 rounded-lg border border-border bg-accent/50 hover:border-electric-blue/50 transition-all"
+                  className="af-debate-row"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    <span className="inline-flex px-[7px] py-[1px] rounded text-[10px] font-bold uppercase bg-muted text-muted-foreground">
                       {debate.category}
                     </span>
-                    <span className="inline-flex items-center rounded-full bg-electric-blue/20 px-2 py-0.5 text-xs font-medium text-electric-blue">
+                    <span className="inline-flex px-[7px] py-[1px] rounded text-[10px] font-bold bg-electric-blue/20 text-electric-blue">
                       Round {debate.current_round}/{debate.total_rounds}
                     </span>
                   </div>
                   <h4 className="text-sm font-bold text-foreground mb-2 line-clamp-2">
                     {debate.topic}
                   </h4>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-text-secondary">
                     <span>{debate.challenger?.username || "?"}</span>
                     <span className="text-electric-blue font-bold">vs</span>
                     <span>{debate.opponent?.username || "?"}</span>
@@ -219,6 +216,6 @@ export function ArenaPanel() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc-client";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Search, Trophy, Swords } from "lucide-react";
 
 const creatorStatusColors: Record<string, string> = {
@@ -23,31 +21,41 @@ export default function AdvertiserCreatorsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-3">
         <Users className="h-6 w-6 text-neon-orange" />
-        <h1 className="text-2xl font-bold">Creator Marketplace</h1>
+        <h1 className="text-[24px] font-extrabold text-foreground">Creator Marketplace</h1>
       </div>
 
+      {/* Search */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search creators..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
+          className="pl-9 bg-bg-tertiary border-af-border"
         />
       </div>
 
+      {/* Grid */}
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 rounded-xl" />
+            <div
+              key={i}
+              className="h-40 rounded-[12px] bg-bg-secondary border border-af-border animate-pulse"
+            />
           ))}
         </div>
       ) : (creators ?? []).length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8 text-center">
-          No creators found.
-        </p>
+        <div className="text-center py-12 border-2 border-dashed border-af-border rounded-[14px]">
+          <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-60" />
+          <p className="text-base font-bold text-foreground">No Creators Found</p>
+          <p className="text-[13px] text-muted-foreground mt-1">
+            Try adjusting your search terms
+          </p>
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(creators ?? []).map((creator) => {
@@ -55,30 +63,32 @@ export default function AdvertiserCreatorsPage() {
             return (
               <div
                 key={creator.id}
-                className="rounded-xl border border-border/50 bg-card/80 p-5 space-y-3 hover:border-electric-blue/30 transition-colors"
+                className="bg-bg-secondary border border-af-border rounded-[12px] p-5 space-y-3 hover:border-electric-blue transition-colors"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{creator.username}</h3>
+                  <h3 className="font-bold text-foreground">{creator.username}</h3>
                   {creator.creatorStatus && (
-                    <Badge variant="outline" className={`text-[10px] ${creatorStatusColors[creator.creatorStatus] ?? ""}`}>
+                    <span
+                      className={`inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold ${creatorStatusColors[creator.creatorStatus] ?? ""}`}
+                    >
                       {creator.creatorStatus}
-                    </Badge>
+                    </span>
                   )}
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div>
-                    <Trophy className="h-3.5 w-3.5 mx-auto text-muted-foreground" />
-                    <p className="text-sm font-bold mt-0.5">{creator.elo_rating}</p>
+                  <div className="bg-bg-tertiary border border-af-border rounded-[8px] py-2">
+                    <Trophy className="h-3.5 w-3.5 mx-auto text-electric-blue" />
+                    <p className="text-sm font-bold mt-0.5 text-foreground">{creator.elo_rating}</p>
                     <p className="text-[10px] text-muted-foreground">ELO</p>
                   </div>
-                  <div>
-                    <Swords className="h-3.5 w-3.5 mx-auto text-muted-foreground" />
-                    <p className="text-sm font-bold mt-0.5">{creator.debates_won}</p>
+                  <div className="bg-bg-tertiary border border-af-border rounded-[8px] py-2">
+                    <Swords className="h-3.5 w-3.5 mx-auto text-cyber-green" />
+                    <p className="text-sm font-bold mt-0.5 text-foreground">{creator.debates_won}</p>
                     <p className="text-[10px] text-muted-foreground">Wins</p>
                   </div>
-                  <div>
-                    <Users className="h-3.5 w-3.5 mx-auto text-muted-foreground" />
-                    <p className="text-sm font-bold mt-0.5">{followers}</p>
+                  <div className="bg-bg-tertiary border border-af-border rounded-[8px] py-2">
+                    <Users className="h-3.5 w-3.5 mx-auto text-neon-orange" />
+                    <p className="text-sm font-bold mt-0.5 text-foreground">{followers}</p>
                     <p className="text-[10px] text-muted-foreground">Followers</p>
                   </div>
                 </div>

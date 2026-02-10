@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -17,8 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sun,
-  Moon,
   User,
   Settings,
   LogOut,
@@ -30,8 +27,8 @@ import {
   Coins,
   ShoppingCart,
   Zap,
-  Shield,
   Menu,
+  ArrowLeftRight,
 } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -51,88 +48,83 @@ export function TopNav({ currentPanel }: TopNavProps) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 h-16 md:h-20 bg-background/80 backdrop-blur-sm border-b border-border/40 z-50">
+      <nav className="fixed top-0 left-0 right-0 h-16 bg-black/85 backdrop-blur-[12px] border-b border-af-border z-50">
         <div className="h-full px-4 md:px-8 flex items-center justify-between">
           {/* Left: Logo + Mobile Menu */}
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
+            <button
+              className="md:hidden w-9 h-9 rounded-lg border-none bg-transparent text-text-secondary flex items-center justify-center hover:bg-bg-tertiary hover:text-text-primary transition-all"
               onClick={() => setMobileOpen(true)}
             >
               <Menu className="h-5 w-5" />
-            </Button>
+            </button>
 
             <Link
               href="/dashboard"
-              className="flex items-center text-lg md:text-xl font-bold"
+              className="text-xl font-extrabold text-electric-blue hover:text-electric-blue/80 transition-colors tracking-wider"
             >
-              <span className="text-electric-blue hover:text-electric-blue/80 transition-colors">
-                ARGU FIGHT
-              </span>
+              ARGU FIGHT
             </Link>
           </div>
 
           {/* Center: Panel Title */}
           {currentPanel && (
-            <h2 className="absolute left-1/2 -translate-x-1/2 text-lg md:text-2xl font-bold text-foreground hidden md:block">
+            <h2 className="absolute left-1/2 -translate-x-1/2 text-[22px] font-extrabold text-foreground tracking-[2px] hidden md:block">
               {currentPanel}
             </h2>
           )}
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="h-9 w-9"
-            >
-              <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
-            </Button>
-
-            {/* Admin Link */}
-            {user?.isAdmin && (
-              <Link
-                href="/admin"
-                className="hidden md:inline-flex items-center px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-electric-blue hover:text-neon-orange transition-colors border border-electric-blue/30 rounded-lg hover:bg-electric-blue/10"
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle Group */}
+            <div className="af-theme-group hidden md:flex">
+              <button
+                className={`af-theme-btn ${!theme || theme === "dark" ? "active" : ""}`}
+                onClick={() => setTheme("dark")}
               >
-                <Shield className="h-3.5 w-3.5 mr-1" />
-                Admin
-              </Link>
-            )}
+                Dark
+              </button>
+              <button
+                className={`af-theme-btn ${theme === "light" ? "active" : ""}`}
+                onClick={() => setTheme("light")}
+              >
+                Light
+              </button>
+              <button
+                className={`af-theme-btn ${theme === "purple" ? "active" : ""}`}
+                onClick={() => setTheme("purple")}
+              >
+                Purple
+              </button>
+            </div>
 
             {/* Notifications */}
             <NotificationBell />
 
-            {/* Coin Balance */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden gap-1 text-neon-orange md:flex"
-              asChild
-            >
-              <Link href="/coins">
-                <Coins className="h-4 w-4" />
-                <span className="text-xs font-semibold">
-                  {user?.coins ?? 0}
-                </span>
-              </Link>
-            </Button>
+            {/* Switch Button (admin/creator nav) */}
+            {(user?.isAdmin || user?.isCreator) && (
+              <button
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-electric-blue/50 bg-transparent text-electric-blue text-[13px] font-semibold hover:bg-electric-blue/10 transition-all cursor-pointer"
+                onClick={() => {
+                  if (user?.isAdmin) router.push("/admin");
+                  else if (user?.isCreator) router.push("/creator/dashboard");
+                }}
+              >
+                <ArrowLeftRight className="h-4 w-4" />
+                Switch
+              </button>
+            )}
 
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 hover:bg-accent rounded-lg p-2 transition-colors cursor-pointer">
+                <button className="flex items-center gap-2 hover:bg-accent rounded-lg py-1.5 px-2.5 transition-colors cursor-pointer">
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={user?.avatarUrl || undefined}
                       alt={user?.username || "User"}
                     />
-                    <AvatarFallback className="text-xs">
+                    <AvatarFallback className="text-xs bg-electric-blue/20 text-electric-blue font-bold">
                       {initials}
                     </AvatarFallback>
                   </Avatar>

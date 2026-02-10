@@ -3,9 +3,6 @@
 import { use, useState } from "react";
 import { trpc } from "@/lib/trpc-client";
 import { useSession } from "next-auth/react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BeltHistory } from "@/components/belt/belt-history";
@@ -40,7 +37,7 @@ const typeColors: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   ACTIVE: "bg-cyber-green/10 text-cyber-green border-cyber-green/30",
-  INACTIVE: "bg-muted text-muted-foreground border-border",
+  INACTIVE: "bg-muted text-muted-foreground border-af-border",
   VACANT: "bg-yellow-400/10 text-yellow-400 border-yellow-400/30",
   STAKED: "bg-neon-orange/10 text-neon-orange border-neon-orange/30",
   GRACE_PERIOD: "bg-electric-blue/10 text-electric-blue border-electric-blue/30",
@@ -62,16 +59,16 @@ export default function BeltDetailPage({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <div className="h-8 w-64 rounded bg-bg-secondary border border-af-border animate-pulse" />
+        <div className="h-48 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
+        <div className="h-64 w-full rounded-[14px] bg-bg-secondary border border-af-border animate-pulse" />
       </div>
     );
   }
 
   if (!belt) {
     return (
-      <div className="py-16 text-center">
+      <div className="text-center py-16 border-2 border-dashed border-af-border rounded-[14px]">
         <p className="text-muted-foreground">Belt not found.</p>
       </div>
     );
@@ -90,133 +87,140 @@ export default function BeltDetailPage({
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/belts/room">
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </Button>
-            <div className={`rounded-lg p-2.5 border ${typeColors[belt.type] ?? "border-border"}`}>
+            <Link
+              href="/belts/room"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-bg-tertiary border border-af-border text-foreground hover:border-electric-blue hover:text-electric-blue transition-all"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <div className={`rounded-lg p-2.5 border ${typeColors[belt.type] ?? "border-af-border"}`}>
               <Icon className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{belt.name}</h1>
+              <h1 className="text-[24px] font-extrabold text-foreground">{belt.name}</h1>
               <div className="flex items-center gap-2 mt-0.5">
-                <Badge variant="outline" className={`text-[10px] ${typeColors[belt.type] ?? ""}`}>
+                <span className={`inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border ${typeColors[belt.type] ?? ""}`}>
                   {belt.type}
-                </Badge>
+                </span>
                 {belt.category && (
-                  <Badge variant="outline" className="text-[10px]">
+                  <span className="inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border border-af-border text-muted-foreground">
                     {belt.category}
-                  </Badge>
+                  </span>
                 )}
-                <Badge variant="outline" className={`text-[10px] ${statusColors[belt.status] ?? ""}`}>
+                <span className={`inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border ${statusColors[belt.status] ?? ""}`}>
                   {belt.status.replace(/_/g, " ")}
-                </Badge>
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         {canChallenge && (
-          <Button
+          <button
             onClick={() => setChallengeOpen(true)}
-            className="bg-neon-orange text-black hover:bg-neon-orange/90"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-neon-orange text-black font-bold text-sm hover:bg-neon-orange/90 transition-colors"
           >
-            <Swords className="mr-2 h-4 w-4" />
+            <Swords className="h-4 w-4" />
             Challenge
-          </Button>
+          </button>
         )}
         {isHolder && (
-          <Badge className="bg-neon-orange/20 text-neon-orange border-neon-orange/30">
+          <span className="inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold bg-neon-orange/20 text-neon-orange border border-neon-orange/30">
             You hold this belt
-          </Badge>
+          </span>
         )}
       </div>
 
       {/* Current holder card */}
-      <div className="rounded-xl border border-border/50 bg-card/80 p-6">
-        <h2 className="text-sm font-medium text-muted-foreground mb-3">
-          Current Holder
-        </h2>
-        {belt.users ? (
-          <div className="flex items-center justify-between">
-            <Link
-              href={`/${belt.users.username}`}
-              className="flex items-center gap-3 hover:opacity-80"
-            >
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="text-sm">
-                  {belt.users.username.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">{belt.users.username}</p>
-                <p className="text-sm text-muted-foreground">
-                  ELO {belt.users.elo_rating}
-                </p>
-              </div>
-            </Link>
-            <div className="grid grid-cols-3 gap-6 text-center">
-              <div>
-                <p className="text-lg font-bold text-cyber-green">
-                  {belt.successful_defenses}
-                </p>
-                <p className="text-[10px] text-muted-foreground">Defenses</p>
-              </div>
-              <div>
-                <p className="text-lg font-bold">{belt.total_days_held}</p>
-                <p className="text-[10px] text-muted-foreground">Days Held</p>
-              </div>
-              <div>
-                <p className="text-lg font-bold text-neon-orange">
-                  {belt.coin_value}
-                </p>
-                <p className="text-[10px] text-muted-foreground">Coin Value</p>
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+        <div className="p-6 border-b border-af-border">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            Current Holder
+          </h2>
+        </div>
+        <div className="p-6">
+          {belt.users ? (
+            <div className="flex items-center justify-between">
+              <Link
+                href={`/${belt.users.username}`}
+                className="flex items-center gap-3 hover:opacity-80"
+              >
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback className="text-sm">
+                    {belt.users.username.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold text-foreground">{belt.users.username}</p>
+                  <p className="text-[13px] text-text-secondary">
+                    ELO {belt.users.elo_rating}
+                  </p>
+                </div>
+              </Link>
+              <div className="grid grid-cols-3 gap-6 text-center">
+                <div>
+                  <p className="text-lg font-bold text-cyber-green">
+                    {belt.successful_defenses}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">Defenses</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-foreground">{belt.total_days_held}</p>
+                  <p className="text-[10px] text-muted-foreground">Days Held</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-neon-orange">
+                    {belt.coin_value}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">Coin Value</p>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-4">
-            This belt is vacant. Win a qualifying debate to claim it!
-          </p>
-        )}
+          ) : (
+            <p className="text-center text-muted-foreground py-4">
+              This belt is vacant. Win a qualifying debate to claim it!
+            </p>
+          )}
 
-        {/* Dates */}
-        <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border/30 text-xs text-muted-foreground">
-          {belt.acquired_at && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              Acquired {formatDistanceToNow(belt.acquired_at)}
-            </span>
-          )}
-          {belt.last_defended_at && (
-            <span>Last defended {formatDistanceToNow(belt.last_defended_at)}</span>
-          )}
-          {belt.next_defense_due && (
-            <span className="text-neon-orange">
-              Defense due {new Date(belt.next_defense_due).toLocaleDateString()}
-            </span>
-          )}
-          {belt.grace_period_ends && (
-            <span className="text-electric-blue">
-              Grace period ends{" "}
-              {new Date(belt.grace_period_ends).toLocaleDateString()}
-            </span>
-          )}
+          {/* Dates */}
+          <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-af-border text-xs text-muted-foreground">
+            {belt.acquired_at && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Acquired {formatDistanceToNow(belt.acquired_at)}
+              </span>
+            )}
+            {belt.last_defended_at && (
+              <span>Last defended {formatDistanceToNow(belt.last_defended_at)}</span>
+            )}
+            {belt.next_defense_due && (
+              <span className="text-neon-orange">
+                Defense due {new Date(belt.next_defense_due).toLocaleDateString()}
+              </span>
+            )}
+            {belt.grace_period_ends && (
+              <span className="text-electric-blue">
+                Grace period ends{" "}
+                {new Date(belt.grace_period_ends).toLocaleDateString()}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Active challenges */}
       {belt.belt_challenges.length > 0 && (
-        <div className="rounded-xl border border-border/50 bg-card/80 p-5">
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">
-            Active Challenges
-          </h2>
-          <div className="space-y-2">
+        <div className="bg-bg-secondary border border-af-border rounded-[14px] overflow-hidden">
+          <div className="p-6 border-b border-af-border">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              Active Challenges
+            </h2>
+          </div>
+          <div className="p-5 space-y-2">
             {belt.belt_challenges.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border/30"
+                className="flex items-center justify-between p-3 rounded-lg border border-af-border"
               >
                 <div className="flex items-center gap-2">
                   <Avatar className="h-7 w-7">
@@ -227,7 +231,7 @@ export default function BeltDetailPage({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-medium text-foreground">
                       {c.users_belt_challenges_challenger_idTousers.username}
                     </span>
                     <span className="text-xs text-muted-foreground ml-2">
@@ -242,9 +246,9 @@ export default function BeltDetailPage({
                       {c.entry_fee}
                     </span>
                   )}
-                  <Badge variant="outline" className="text-[10px]">
+                  <span className="inline-flex px-[10px] py-[3px] rounded-[6px] text-[11px] font-bold border border-af-border text-muted-foreground">
                     {c.status}
-                  </Badge>
+                  </span>
                   <span className="text-[10px] text-muted-foreground">
                     expires {formatDistanceToNow(c.expires_at)}
                   </span>

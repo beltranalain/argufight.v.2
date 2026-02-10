@@ -3,12 +3,6 @@
 import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DebateCard } from "@/components/debate/debate-card";
 import { DebateListSkeleton } from "@/components/skeletons/debate-card-skeleton";
 import {
@@ -21,6 +15,7 @@ import {
   Gift,
   Coins,
   Flame,
+  Loader2,
 } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/utils";
 import { toast } from "sonner";
@@ -62,31 +57,31 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20">
             <AvatarImage src={user.avatar_url ?? undefined} />
-            <AvatarFallback className="text-xl bg-electric-blue/20 text-electric-blue">
+            <AvatarFallback className="text-xl bg-electric-blue/20 text-electric-blue font-bold">
               {user.username.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{user.username}</h1>
+              <h1 className="text-[24px] font-extrabold text-foreground">{user.username}</h1>
               {isPro && (
-                <Badge className="bg-electric-blue/20 text-electric-blue border-electric-blue/30">
+                <span className="inline-flex px-2.5 py-0.5 rounded-md bg-electric-blue/15 text-electric-blue text-[11px] font-bold">
                   PRO
-                </Badge>
+                </span>
               )}
               {user.is_creator && (
-                <Badge className="bg-cyber-green/20 text-cyber-green border-cyber-green/30">
+                <span className="inline-flex px-2.5 py-0.5 rounded-md bg-cyber-green/15 text-cyber-green text-[11px] font-bold">
                   Creator
-                </Badge>
+                </span>
               )}
               {user.is_admin && (
-                <Badge className="bg-hot-pink/20 text-hot-pink border-hot-pink/30">
+                <span className="inline-flex px-2.5 py-0.5 rounded-md bg-hot-pink/15 text-hot-pink text-[11px] font-bold">
                   Admin
-                </Badge>
+                </span>
               )}
             </div>
             {user.bio && (
-              <p className="mt-1 text-sm text-muted-foreground">{user.bio}</p>
+              <p className="mt-1 text-sm text-text-secondary">{user.bio}</p>
             )}
             <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -100,72 +95,66 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/settings">
-            <Settings className="mr-1 h-3.5 w-3.5" />
-            Edit Profile
-          </Link>
-        </Button>
+        <Link
+          href="/settings"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-bg-tertiary border border-af-border text-sm font-semibold text-foreground hover:border-electric-blue hover:text-electric-blue transition-all"
+        >
+          <Settings className="h-3.5 w-3.5" />
+          Edit Profile
+        </Link>
       </div>
 
       {/* Daily reward + streak */}
-      <Card className="border-border/50 bg-card/80">
-        <CardContent className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <Flame className="h-6 w-6 text-neon-orange" />
-            <div>
-              <p className="text-sm font-medium">
-                {user.consecutive_login_days ?? 0} day streak
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Best: {user.longest_login_streak ?? 0} days
-              </p>
-            </div>
+      <div className="bg-bg-secondary border border-af-border rounded-[14px] p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Flame className="h-6 w-6 text-neon-orange" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              {user.consecutive_login_days ?? 0} day streak
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Best: {user.longest_login_streak ?? 0} days
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-sm font-semibold text-neon-orange">
-              <Coins className="h-4 w-4" />
-              {user.coins}
-            </div>
-            <Button
-              size="sm"
-              className="bg-cyber-green text-black hover:bg-cyber-green/90"
-              onClick={() => claimReward.mutate()}
-              disabled={claimReward.isPending}
-            >
-              <Gift className="mr-1 h-3.5 w-3.5" />
-              Daily Reward
-            </Button>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 text-sm font-bold text-neon-orange">
+            <Coins className="h-4 w-4" />
+            {user.coins}
           </div>
-        </CardContent>
-      </Card>
+          <button
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyber-green text-black text-sm font-bold hover:bg-cyber-green/90 transition-colors disabled:opacity-50"
+            onClick={() => claimReward.mutate()}
+            disabled={claimReward.isPending}
+          >
+            {claimReward.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Gift className="h-3.5 w-3.5" />
+            )}
+            Daily Reward
+          </button>
+        </div>
+      </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-electric-blue">{user.elo_rating}</p>
-            <p className="text-xs text-muted-foreground">ELO Rating</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold">{user.total_debates}</p>
-            <p className="text-xs text-muted-foreground">Debates</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-cyber-green">{winRate}%</p>
-            <p className="text-xs text-muted-foreground">Win Rate</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-yellow-400">{user.current_belts_count}</p>
-            <p className="text-xs text-muted-foreground">Belts Held</p>
-          </CardContent>
-        </Card>
+        <div className="bg-bg-secondary border border-af-border rounded-[10px] p-4 text-center">
+          <p className="text-[28px] font-extrabold text-electric-blue">{user.elo_rating}</p>
+          <p className="text-xs text-muted-foreground">ELO Rating</p>
+        </div>
+        <div className="bg-bg-secondary border border-af-border rounded-[10px] p-4 text-center">
+          <p className="text-[28px] font-extrabold text-foreground">{user.total_debates}</p>
+          <p className="text-xs text-muted-foreground">Debates</p>
+        </div>
+        <div className="bg-bg-secondary border border-af-border rounded-[10px] p-4 text-center">
+          <p className="text-[28px] font-extrabold text-cyber-green">{winRate}%</p>
+          <p className="text-xs text-muted-foreground">Win Rate</p>
+        </div>
+        <div className="bg-bg-secondary border border-af-border rounded-[10px] p-4 text-center">
+          <p className="text-[28px] font-extrabold text-yellow-400">{user.current_belts_count}</p>
+          <p className="text-xs text-muted-foreground">Belts Held</p>
+        </div>
       </div>
 
       <div className="flex items-center justify-center gap-6 text-sm">
@@ -180,29 +169,29 @@ export default function ProfilePage() {
         </span>
       </div>
 
-      <Separator />
+      <div className="border-t border-af-border" />
 
-      {/* Debates */}
-      <Tabs defaultValue="recent">
-        <TabsList>
-          <TabsTrigger value="recent">Recent Debates</TabsTrigger>
-        </TabsList>
-        <TabsContent value="recent" className="mt-4">
-          {debatesLoading ? (
-            <DebateListSkeleton count={3} />
-          ) : debates.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No debates yet. Start your first debate!
+      {/* Recent Debates */}
+      <div>
+        <h2 className="text-lg font-bold text-foreground mb-4">Recent Debates</h2>
+        {debatesLoading ? (
+          <DebateListSkeleton count={3} />
+        ) : debates.length === 0 ? (
+          <div className="text-center py-10 border-2 border-dashed border-af-border rounded-xl">
+            <Swords className="w-10 h-10 mx-auto mb-3 text-electric-blue opacity-60" />
+            <p className="text-sm font-bold text-foreground">No debates yet</p>
+            <p className="text-[13px] text-muted-foreground mt-1">
+              Start your first debate!
             </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {debates.map((d) => (
-                <DebateCard key={d.id} debate={d} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {debates.map((d) => (
+              <DebateCard key={d.id} debate={d} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -211,16 +200,16 @@ function ProfileSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Skeleton className="h-20 w-20 rounded-full" />
-        <div>
-          <Skeleton className="h-7 w-40" />
-          <Skeleton className="mt-2 h-4 w-60" />
-          <Skeleton className="mt-2 h-3 w-32" />
+        <div className="h-20 w-20 rounded-full bg-bg-secondary border border-af-border animate-pulse" />
+        <div className="space-y-2">
+          <div className="h-7 w-40 rounded bg-bg-secondary animate-pulse" />
+          <div className="h-4 w-60 rounded bg-bg-secondary animate-pulse" />
+          <div className="h-3 w-32 rounded bg-bg-secondary animate-pulse" />
         </div>
       </div>
       <div className="grid grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 rounded-xl" />
+          <div key={i} className="h-20 rounded-[10px] bg-bg-secondary border border-af-border animate-pulse" />
         ))}
       </div>
     </div>

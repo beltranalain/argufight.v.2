@@ -257,3 +257,335 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================
+   MOCKUP-MATCHING COMPONENT CLASSES
+   ========================================== */
+
+/* Panel — main content card container */
+.af-panel {
+  background: var(--af-bg-secondary);
+  border: 1px solid var(--af-border);
+  border-radius: 14px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.af-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.af-panel-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--af-text-primary);
+}
+
+.af-panel-subtitle {
+  font-size: 13px;
+  color: var(--af-text-secondary);
+  margin-bottom: 16px;
+}
+
+/* View All button */
+.af-view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--af-border);
+  background: var(--af-bg-tertiary);
+  color: var(--af-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.af-view-all-btn:hover {
+  border-color: var(--color-electric-blue);
+  color: var(--color-electric-blue);
+}
+
+/* Link blue */
+.af-link-blue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-electric-blue);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.af-link-blue:hover {
+  color: var(--color-neon-orange);
+}
+
+/* Stat Card — admin dashboard */
+.af-stat-card {
+  background: var(--af-bg-secondary);
+  border: 1px solid var(--af-border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.af-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.af-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.af-stat-card.stat-blue::before {
+  background: linear-gradient(90deg, var(--color-electric-blue), transparent);
+}
+.af-stat-card.stat-pink::before {
+  background: linear-gradient(90deg, var(--color-hot-pink), transparent);
+}
+.af-stat-card.stat-green::before {
+  background: linear-gradient(90deg, var(--color-cyber-green), transparent);
+}
+.af-stat-card.stat-orange::before {
+  background: linear-gradient(90deg, var(--color-neon-orange), transparent);
+}
+
+.af-stat-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.af-stat-card.stat-blue .af-stat-card-icon {
+  background: rgba(0, 217, 255, 0.15);
+  color: var(--color-electric-blue);
+}
+.af-stat-card.stat-pink .af-stat-card-icon {
+  background: rgba(255, 0, 110, 0.15);
+  color: var(--color-hot-pink);
+}
+.af-stat-card.stat-green .af-stat-card-icon {
+  background: rgba(0, 255, 148, 0.15);
+  color: var(--color-cyber-green);
+}
+.af-stat-card.stat-orange .af-stat-card-icon {
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--color-neon-orange);
+}
+
+.af-stat-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--af-text-secondary);
+}
+
+.af-stat-card-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--af-text-primary);
+}
+
+.af-stat-card-desc {
+  font-size: 12px;
+  color: var(--af-text-muted);
+  margin-top: 4px;
+}
+
+/* Tabs — bottom border indicator style */
+.af-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--af-border);
+}
+
+.af-tab {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--af-text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+.af-tab:hover {
+  color: var(--af-text-primary);
+}
+.af-tab.active {
+  color: var(--color-electric-blue);
+  border-bottom-color: var(--color-electric-blue);
+}
+
+/* Empty state */
+.af-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed var(--af-border);
+  border-radius: 12px;
+}
+
+.af-empty-state-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--af-text-primary);
+  margin-bottom: 4px;
+}
+
+.af-empty-state-desc {
+  font-size: 13px;
+  color: var(--af-text-muted);
+}
+
+/* 3-column grid — user dashboard */
+.af-grid-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .af-grid-3col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Debate 2-column grid */
+.af-debate-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .af-debate-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Nav section title — admin sidebar groups */
+.af-nav-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--af-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 12px 12px 6px;
+}
+
+/* Theme toggle group */
+.af-theme-group {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--af-border);
+}
+
+.af-theme-btn {
+  padding: 6px 14px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--af-text-muted);
+}
+.af-theme-btn.active {
+  background: var(--color-electric-blue);
+  color: #000;
+}
+.af-theme-btn:hover:not(.active) {
+  background: var(--af-bg-tertiary);
+  color: var(--af-text-primary);
+}
+
+/* Filter select */
+.af-filter-select {
+  height: 36px;
+  background: var(--af-bg-tertiary);
+  border: 1px solid var(--af-border);
+  border-radius: 8px;
+  padding: 0 32px 0 12px;
+  color: var(--af-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+.af-filter-select:hover {
+  border-color: rgba(0, 217, 255, 0.5);
+}
+.af-filter-select:focus {
+  border-color: var(--color-electric-blue);
+  box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.2);
+}
+
+/* Debate row — reusable debate list item */
+.af-debate-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--af-bg-tertiary);
+  transition: all 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+.af-debate-row:hover {
+  background: var(--af-bg-tertiary);
+  border-color: rgba(0, 217, 255, 0.3);
+}
+
+/* Badge */
+.af-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.af-badge-blue {
+  background: rgba(0, 217, 255, 0.15);
+  color: var(--color-electric-blue);
+}
+.af-badge-green {
+  background: rgba(0, 255, 148, 0.15);
+  color: var(--color-cyber-green);
+}
+.af-badge-orange {
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--color-neon-orange);
+}
+.af-badge-pink {
+  background: rgba(255, 0, 110, 0.15);
+  color: var(--color-hot-pink);
+}
+
+/* Statement cards — debate page */
+.af-statement-challenger {
+  background: rgba(0, 217, 255, 0.05);
+  border-left: 3px solid var(--color-electric-blue);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.af-statement-opponent {
+  background: var(--af-bg-tertiary);
+  border-left: 3px solid var(--af-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
