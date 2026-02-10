@@ -1,0 +1,2191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model ab_tests {
+  id                                                         String         @id
+  name                                                       String
+  description                                                String?
+  model_version_a_id                                         String
+  model_version_b_id                                         String
+  traffic_split                                              Int            @default(50)
+  start_date                                                 DateTime
+  end_date                                                   DateTime?
+  status                                                     String         @default("draft")
+  is_active                                                  Boolean        @default(false)
+  model_a_score                                              Float?
+  model_b_score                                              Float?
+  winner                                                     String?
+  created_by                                                 String?
+  created_at                                                 DateTime       @default(now())
+  updated_at                                                 DateTime
+  model_versions_ab_tests_model_version_a_idTomodel_versions model_versions @relation("ab_tests_model_version_a_idTomodel_versions", fields: [model_version_a_id], references: [id], onDelete: Cascade)
+  model_versions_ab_tests_model_version_b_idTomodel_versions model_versions @relation("ab_tests_model_version_b_idTomodel_versions", fields: [model_version_b_id], references: [id], onDelete: Cascade)
+
+  @@index([is_active])
+  @@index([start_date])
+  @@index([status])
+}
+
+model ad_contracts {
+  id                    String         @id
+  offer_id              String         @unique
+  advertiser_id         String
+  creator_id            String
+  campaign_id           String
+  placement             PlacementType
+  total_amount          Decimal        @db.Decimal(10, 2)
+  platform_fee          Decimal        @db.Decimal(10, 2)
+  creator_payout        Decimal        @db.Decimal(10, 2)
+  start_date            DateTime
+  end_date              DateTime
+  impressions_delivered Int            @default(0)
+  clicks_delivered      Int            @default(0)
+  status                ContractStatus @default(SCHEDULED)
+  signed_at             DateTime       @default(now())
+  completed_at          DateTime?
+  cancelled_at          DateTime?
+  cancellation_reason   String?
+  escrow_held           Boolean        @default(false)
+  payout_sent           Boolean        @default(false)
+  payout_date           DateTime?
+  stripe_payment_id     String?
+  stripe_payout_id      String?
+  advertisers           advertisers    @relation(fields: [advertiser_id], references: [id], onDelete: Cascade)
+  campaigns             campaigns      @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  users                 users          @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  offers                offers         @relation(fields: [offer_id], references: [id], onDelete: Cascade)
+  clicks                clicks[]
+  impressions           impressions[]
+
+  @@index([advertiser_id])
+  @@index([creator_id])
+  @@index([end_date])
+  @@index([signed_at, status])
+  @@index([status])
+}
+
+model admin_settings {
+  id          String   @id
+  key         String   @unique
+  value       String
+  encrypted   Boolean  @default(false)
+  description String?
+  category    String?
+  updated_by  String?
+  updated_at  DateTime
+  created_at  DateTime @default(now())
+
+  @@index([category])
+}
+
+model advertisements {
+  id           String    @id
+  title        String
+  type         String
+  creative_url String
+  target_url   String
+  status       String    @default("DRAFT")
+  start_date   DateTime?
+  end_date     DateTime?
+  impressions  Int       @default(0)
+  clicks       Int       @default(0)
+  category     String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime
+
+  @@index([category])
+  @@index([status])
+  @@index([type])
+}
+
+model advertisers {
+  id                String           @id
+  company_name      String
+  website           String
+  industry          String
+  contact_email     String           @unique
+  contact_name      String
+  business_ein      String?
+  status            AdvertiserStatus @default(PENDING)
+  stripe_account_id String?          @unique
+  payment_ready     Boolean          @default(false)
+  created_at        DateTime         @default(now())
+  updated_at        DateTime
+  approved_at       DateTime?
+  approved_by       String?
+  rejection_reason  String?
+  suspended_at      DateTime?
+  suspension_reason String?
+  contact_phone     String?
+  company_size      String?
+  monthly_ad_budget String?
+  marketing_goals   String?
+  ad_contracts      ad_contracts[]
+  campaigns         campaigns[]
+  offers            offers[]
+
+  @@index([contact_email])
+  @@index([created_at])
+  @@index([status])
+}
+
+model api_usage {
+  id                 String   @id
+  provider           String
+  endpoint           String
+  model              String?
+  prompt_tokens      Int?
+  completion_tokens  Int?
+  total_tokens       Int?
+  cost               Float    @default(0)
+  cost_per_1k_tokens Float?
+  debate_id          String?
+  user_id            String?
+  success            Boolean  @default(true)
+  error_message      String?
+  response_time      Int?
+  metadata           String?
+  created_at         DateTime @default(now())
+  debates            debates? @relation(fields: [debate_id], references: [id])
+  users              users?   @relation(fields: [user_id], references: [id])
+
+  @@index([created_at])
+  @@index([debate_id])
+  @@index([provider])
+  @@index([user_id])
+}
+
+model appeal_limits {
+  id            String   @id
+  user_id       String   @unique
+  monthly_limit Int      @default(4)
+  current_count Int      @default(0)
+  reset_date    DateTime @default(now())
+  created_at    DateTime @default(now())
+  updated_at    DateTime
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model appeal_predictions {
+  id                String          @id
+  debate_id         String          @unique
+  model_version_id  String?
+  predicted_success Boolean
+  confidence        Float
+  reasoning         String?
+  actual_success    Boolean?
+  predicted_at      DateTime        @default(now())
+  resolved_at       DateTime?
+  debates           debates         @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  model_versions    model_versions? @relation(fields: [model_version_id], references: [id])
+
+  @@index([actual_success])
+  @@index([model_version_id])
+  @@index([predicted_success])
+}
+
+model appeal_subscriptions {
+  id                     String    @id
+  user_id                String
+  plan_name              String
+  appeals_included       Int
+  price                  Decimal   @db.Decimal(10, 2)
+  status                 String
+  start_date             DateTime  @default(now())
+  end_date               DateTime?
+  stripe_subscription_id String?   @unique
+  created_at             DateTime  @default(now())
+  updated_at             DateTime
+  users                  users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([user_id])
+}
+
+model belt_challenges {
+  id                                          String              @id
+  belt_id                                     String
+  challenger_id                               String
+  belt_holder_id                              String
+  status                                      ChallengeStatus     @default(PENDING)
+  entry_fee                                   Int                 @default(0)
+  coin_reward                                 Int                 @default(0)
+  response                                    ChallengeStatus?
+  responded_at                                DateTime?
+  decline_count                               Int                 @default(0)
+  debate_id                                   String?             @unique
+  challenger_elo                              Int
+  holder_elo                                  Int
+  elo_difference                              Int
+  expires_at                                  DateTime
+  created_at                                  DateTime            @default(now())
+  updated_at                                  DateTime
+  uses_free_challenge                         Boolean             @default(false)
+  debate_allow_copy_paste                     Boolean?
+  debate_category                             String?
+  debate_challenger_position                  String?
+  debate_description                          String?
+  debate_round_duration                       Int?
+  debate_speed_mode                           Boolean?
+  debate_topic                                String?
+  debate_total_rounds                         Int?
+  users_belt_challenges_belt_holder_idTousers users               @relation("belt_challenges_belt_holder_idTousers", fields: [belt_holder_id], references: [id])
+  belts                                       belts               @relation(fields: [belt_id], references: [id], onDelete: Cascade)
+  users_belt_challenges_challenger_idTousers  users               @relation("belt_challenges_challenger_idTousers", fields: [challenger_id], references: [id])
+  debates                                     debates?            @relation(fields: [debate_id], references: [id])
+  coin_transactions                           coin_transactions[]
+
+  @@index([belt_holder_id])
+  @@index([belt_id])
+  @@index([belt_id, status])
+  @@index([challenger_id])
+  @@index([debate_id])
+  @@index([expires_at, status])
+  @@index([status])
+}
+
+model belt_history {
+  id                                     String             @id
+  belt_id                                String
+  from_user_id                           String?
+  to_user_id                             String?
+  reason                                 BeltTransferReason
+  debate_id                              String?
+  tournament_id                          String?
+  days_held                              Int
+  defenses_won                           Int
+  defenses_lost                          Int
+  admin_notes                            String?
+  transferred_by                         String?
+  transferred_at                         DateTime           @default(now())
+  belts                                  belts              @relation(fields: [belt_id], references: [id], onDelete: Cascade)
+  debates                                debates?           @relation(fields: [debate_id], references: [id])
+  users_belt_history_from_user_idTousers users?             @relation("belt_history_from_user_idTousers", fields: [from_user_id], references: [id])
+  users_belt_history_to_user_idTousers   users?             @relation("belt_history_to_user_idTousers", fields: [to_user_id], references: [id])
+  tournaments                            tournaments?       @relation(fields: [tournament_id], references: [id])
+
+  @@index([belt_id])
+  @@index([debate_id])
+  @@index([from_user_id])
+  @@index([to_user_id])
+  @@index([tournament_id])
+}
+
+model belt_settings {
+  id                          String   @id
+  belt_type                   BeltType @unique
+  defense_period_days         Int      @default(30)
+  inactivity_days             Int      @default(30)
+  mandatory_defense_days      Int      @default(60)
+  grace_period_days           Int      @default(30)
+  max_declines                Int      @default(2)
+  challenge_cooldown_days     Int      @default(7)
+  challenge_expiry_days       Int      @default(3)
+  elo_range                   Int      @default(200)
+  activity_requirement_days   Int      @default(30)
+  win_streak_bonus_multiplier Float    @default(1.2)
+  entry_fee_base              Int      @default(100)
+  entry_fee_multiplier        Float    @default(1.0)
+  winner_reward_percent       Int      @default(60)
+  loser_consolation_percent   Int      @default(30)
+  platform_fee_percent        Int      @default(10)
+  tournament_belt_cost_small  Int      @default(500)
+  tournament_belt_cost_medium Int      @default(1000)
+  tournament_belt_cost_large  Int      @default(2000)
+  inactive_competitor_count   Int      @default(2)
+  inactive_accept_days        Int      @default(7)
+  updated_at                  DateTime
+  updated_by                  String?
+  require_coins               Boolean? @default(false)
+  require_free_challenge      Boolean? @default(false)
+  allow_free_challenges       Boolean? @default(true)
+  free_challenges_per_week    Int?     @default(1)
+  require_coins_for_challenge Boolean  @default(true)
+}
+
+model belts {
+  id                                                     String              @id
+  name                                                   String
+  type                                                   BeltType
+  category                                               String?
+  current_holder_id                                      String?
+  status                                                 BeltStatus          @default(VACANT)
+  acquired_at                                            DateTime?
+  last_defended_at                                       DateTime?
+  next_defense_due                                       DateTime?
+  inactive_at                                            DateTime?
+  times_defended                                         Int                 @default(0)
+  successful_defenses                                    Int                 @default(0)
+  total_days_held                                        Int                 @default(0)
+  grace_period_ends                                      DateTime?
+  is_first_holder                                        Boolean             @default(false)
+  is_staked                                              Boolean             @default(false)
+  staked_in_debate_id                                    String?             @unique
+  staked_in_tournament_id                                String?
+  tournament_id                                          String?             @unique
+  design_image_url                                       String?
+  design_colors                                          Json?
+  sponsor_id                                             String?
+  sponsor_name                                           String?
+  sponsor_logo_url                                       String?
+  coin_value                                             Int                 @default(0)
+  creation_cost                                          Int                 @default(0)
+  is_active                                              Boolean             @default(true)
+  admin_notes                                            String?
+  created_at                                             DateTime            @default(now())
+  updated_at                                             DateTime
+  belt_challenges                                        belt_challenges[]
+  belt_history                                           belt_history[]
+  users                                                  users?              @relation(fields: [current_holder_id], references: [id])
+  debates                                                debates?            @relation(fields: [staked_in_debate_id], references: [id])
+  tournaments_belts_staked_in_tournament_idTotournaments tournaments?        @relation("belts_staked_in_tournament_idTotournaments", fields: [staked_in_tournament_id], references: [id])
+  tournaments_belts_tournament_idTotournaments           tournaments?        @relation("belts_tournament_idTotournaments", fields: [tournament_id], references: [id])
+  coin_transactions                                      coin_transactions[]
+
+  @@index([category])
+  @@index([current_holder_id])
+  @@index([staked_in_debate_id])
+  @@index([staked_in_tournament_id])
+  @@index([status])
+  @@index([tournament_id])
+  @@index([type])
+}
+
+model blog_post_categories {
+  id                      String                    @id
+  name                    String                    @unique
+  slug                    String                    @unique
+  description             String?
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime
+  blog_post_to_categories blog_post_to_categories[]
+
+  @@index([slug])
+}
+
+model blog_post_tags {
+  id                String              @id
+  name              String              @unique
+  slug              String              @unique
+  created_at        DateTime            @default(now())
+  blog_post_to_tags blog_post_to_tags[]
+
+  @@index([slug])
+}
+
+model blog_post_to_categories {
+  post_id              String
+  category_id          String
+  blog_post_categories blog_post_categories @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  blog_posts           blog_posts           @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@id([post_id, category_id])
+  @@index([category_id])
+  @@index([post_id])
+}
+
+model blog_post_to_tags {
+  post_id        String
+  tag_id         String
+  blog_posts     blog_posts     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  blog_post_tags blog_post_tags @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([post_id, tag_id])
+  @@index([post_id])
+  @@index([tag_id])
+}
+
+model blog_posts {
+  id                      String                    @id
+  slug                    String                    @unique
+  title                   String
+  excerpt                 String?
+  content                 String
+  meta_title              String?
+  meta_description        String?
+  keywords                String?
+  og_image                String?
+  status                  BlogPostStatus            @default(DRAFT)
+  published_at            DateTime?
+  author_id               String
+  featured_image_id       String?
+  views                   Int                       @default(0)
+  featured                Boolean                   @default(false)
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime
+  calendar_item_id        String?                   @unique
+  strategy_id             String?
+  blog_post_to_categories blog_post_to_categories[]
+  blog_post_to_tags       blog_post_to_tags[]
+  users                   users                     @relation(fields: [author_id], references: [id])
+  content_calendar_items  content_calendar_items?   @relation(fields: [calendar_item_id], references: [id])
+  media_library           media_library?            @relation(fields: [featured_image_id], references: [id])
+  marketing_strategies    marketing_strategies?     @relation(fields: [strategy_id], references: [id])
+  content_analytics       content_analytics[]
+
+  @@index([author_id])
+  @@index([created_at])
+  @@index([featured])
+  @@index([published_at])
+  @@index([slug])
+  @@index([status])
+}
+
+model boards {
+  id          String   @id
+  name        String
+  description String?
+  color       String?  @default("#0079bf")
+  is_archived Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+  lists       lists[]
+
+  @@index([is_archived])
+}
+
+model campaigns {
+  id                     String         @id
+  advertiser_id          String
+  name                   String
+  type                   CampaignType
+  category               String
+  budget                 Decimal        @db.Decimal(10, 2)
+  start_date             DateTime
+  end_date               DateTime
+  banner_url             String?
+  video_url              String?
+  destination_url        String
+  cta_text               String         @default("Learn More")
+  min_elo                Int?
+  target_categories      String[]
+  min_followers          Int?
+  max_budget_per_creator Decimal?       @db.Decimal(10, 2)
+  status                 CampaignStatus @default(PENDING_REVIEW)
+  rejection_reason       String?
+  created_at             DateTime       @default(now())
+  updated_at             DateTime
+  approved_at            DateTime?
+  payment_status         String?        @db.VarChar(20)
+  stripe_payment_id      String?        @db.VarChar(255)
+  paid_at                DateTime?      @db.Timestamp(6)
+  ad_type                String?
+  ad_contracts           ad_contracts[]
+  advertisers            advertisers    @relation(fields: [advertiser_id], references: [id], onDelete: Cascade)
+  clicks                 clicks[]
+  impressions            impressions[]
+  offers                 offers[]
+
+  @@index([advertiser_id])
+  @@index([start_date, end_date])
+  @@index([status])
+  @@index([type])
+}
+
+model card_attachments {
+  id          String   @id
+  card_id     String
+  name        String
+  url         String
+  type        String
+  mime_type   String?
+  file_size   Int?
+  uploaded_by String?
+  created_at  DateTime @default(now())
+  cards       cards    @relation(fields: [card_id], references: [id], onDelete: Cascade)
+
+  @@index([card_id])
+}
+
+model card_checklist_items {
+  id              String          @id
+  checklist_id    String
+  text            String
+  is_completed    Boolean         @default(false)
+  position        Int             @default(0)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime
+  card_checklists card_checklists @relation(fields: [checklist_id], references: [id], onDelete: Cascade)
+
+  @@index([checklist_id])
+}
+
+model card_checklists {
+  id                   String                 @id
+  card_id              String
+  title                String                 @default("Checklist")
+  position             Int                    @default(0)
+  created_at           DateTime               @default(now())
+  updated_at           DateTime
+  card_checklist_items card_checklist_items[]
+  cards                cards                  @relation(fields: [card_id], references: [id], onDelete: Cascade)
+
+  @@index([card_id])
+}
+
+model card_custom_fields {
+  id         String   @id
+  card_id    String
+  name       String
+  value      String
+  field_type String   @default("text")
+  position   Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime
+  cards      cards    @relation(fields: [card_id], references: [id], onDelete: Cascade)
+
+  @@index([card_id])
+}
+
+model card_labels {
+  id         String   @id
+  card_id    String
+  name       String
+  color      String   @default("#61bd4f")
+  created_at DateTime @default(now())
+  cards      cards    @relation(fields: [card_id], references: [id], onDelete: Cascade)
+
+  @@index([card_id])
+}
+
+model card_members {
+  id         String   @id
+  card_id    String
+  user_id    String
+  created_at DateTime @default(now())
+  cards      cards    @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([card_id, user_id])
+  @@index([card_id])
+  @@index([user_id])
+}
+
+model cards {
+  id                 String               @id
+  list_id            String
+  title              String
+  description        String?
+  position           Int                  @default(0)
+  due_date           DateTime?
+  is_archived        Boolean              @default(false)
+  created_at         DateTime             @default(now())
+  updated_at         DateTime
+  latitude           Float?
+  location           String?
+  longitude          Float?
+  reminder_date      DateTime?
+  start_date         DateTime?
+  card_attachments   card_attachments[]
+  card_checklists    card_checklists[]
+  card_custom_fields card_custom_fields[]
+  card_labels        card_labels[]
+  card_members       card_members[]
+  lists              lists                @relation(fields: [list_id], references: [id], onDelete: Cascade)
+
+  @@index([list_id])
+  @@index([position])
+}
+
+model categories {
+  id          String   @id
+  name        String   @unique
+  label       String
+  description String?
+  color       String?
+  icon        String?
+  is_active   Boolean  @default(true)
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+}
+
+model chat_messages {
+  id         String    @id
+  debate_id  String
+  author_id  String
+  content    String
+  deleted    Boolean   @default(false)
+  deleted_at DateTime?
+  deleted_by String?
+  created_at DateTime  @default(now())
+  users      users     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  debates    debates   @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+
+  @@index([debate_id, created_at], map: "ChatMessage_debateId_createdAt_idx")
+  @@index([author_id])
+  @@index([created_at])
+  @@index([debate_id])
+}
+
+model clicks {
+  id           String       @id
+  contract_id  String
+  campaign_id  String
+  user_id      String?
+  ip_address   String
+  user_agent   String
+  referrer     String?
+  timestamp    DateTime     @default(now())
+  campaigns    campaigns    @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  ad_contracts ad_contracts @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+
+  @@index([campaign_id])
+  @@index([contract_id])
+  @@index([ip_address])
+  @@index([timestamp])
+}
+
+model coin_transactions {
+  id                String                @id
+  user_id           String
+  type              CoinTransactionType
+  status            CoinTransactionStatus @default(COMPLETED)
+  amount            Int
+  balance_after     Int
+  belt_challenge_id String?
+  belt_id           String?
+  tournament_id     String?
+  debate_id         String?
+  description       String?
+  metadata          Json?
+  created_at        DateTime              @default(now())
+  updated_at        DateTime
+  belt_challenges   belt_challenges?      @relation(fields: [belt_challenge_id], references: [id])
+  belts             belts?                @relation(fields: [belt_id], references: [id])
+  users             users                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([belt_challenge_id])
+  @@index([created_at])
+  @@index([status])
+  @@index([type])
+  @@index([user_id])
+}
+
+model content_analytics {
+  id                 String              @id
+  social_post_id     String?
+  blog_post_id       String?
+  content_type       String
+  platform           String?
+  impressions        Int                 @default(0)
+  reach              Int                 @default(0)
+  likes              Int                 @default(0)
+  comments           Int                 @default(0)
+  shares             Int                 @default(0)
+  clicks             Int                 @default(0)
+  saves              Int                 @default(0)
+  engagement_rate    Float?
+  click_through_rate Float?
+  recorded_at        DateTime            @default(now())
+  created_at         DateTime            @default(now())
+  blog_posts         blog_posts?         @relation(fields: [blog_post_id], references: [id], onDelete: Cascade)
+  social_media_posts social_media_posts? @relation(fields: [social_post_id], references: [id], onDelete: Cascade)
+
+  @@index([blog_post_id])
+  @@index([recorded_at])
+  @@index([social_post_id])
+}
+
+model content_calendar_items {
+  id                   String                @id
+  strategy_id          String?
+  content_type         String
+  title                String?
+  description          String?
+  scheduled_date       DateTime
+  scheduled_time       String?
+  status               String                @default("DRAFT")
+  platform             String?
+  requires_approval    Boolean               @default(true)
+  approved_at          DateTime?
+  approved_by          String?
+  created_at           DateTime              @default(now())
+  updated_at           DateTime
+  blog_posts           blog_posts?
+  marketing_strategies marketing_strategies? @relation(fields: [strategy_id], references: [id])
+  email_newsletters    email_newsletters?
+  social_media_posts   social_media_posts?
+
+  @@index([content_type])
+  @@index([scheduled_date])
+  @@index([status])
+}
+
+model conversations {
+  id                                  String            @id
+  user1_id                            String
+  user2_id                            String
+  last_message_id                     String?
+  last_message_at                     DateTime?
+  user1_last_read_at                  DateTime?
+  user2_last_read_at                  DateTime?
+  created_at                          DateTime          @default(now())
+  updated_at                          DateTime
+  users_conversations_user1_idTousers users             @relation("conversations_user1_idTousers", fields: [user1_id], references: [id], onDelete: Cascade)
+  users_conversations_user2_idTousers users             @relation("conversations_user2_idTousers", fields: [user2_id], references: [id], onDelete: Cascade)
+  direct_messages                     direct_messages[]
+
+  @@unique([user1_id, user2_id])
+  @@index([last_message_at])
+  @@index([user1_id])
+  @@index([user2_id])
+}
+
+model creator_tax_info {
+  id                String          @id
+  creator_id        String          @unique
+  stripe_account_id String          @unique
+  legal_name        String?
+  business_name     String?
+  tax_id_type       String?
+  tax_form_complete Boolean         @default(false)
+  w9_submitted      Boolean         @default(false)
+  w9_submitted_at   DateTime?
+  bank_verified     Boolean         @default(false)
+  payout_enabled    Boolean         @default(false)
+  yearly_earnings   Json            @default("{}")
+  created_at        DateTime        @default(now())
+  updated_at        DateTime
+  address_line1     String?
+  address_line2     String?
+  business_type     String?
+  city              String?
+  country           String?
+  state             String?
+  tax_id            String?
+  zip_code          String?
+  users             users           @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  tax_form_1099     tax_form_1099[]
+}
+
+model debate_comments {
+  id                    String            @id
+  debate_id             String
+  user_id               String
+  content               String
+  parent_id             String?
+  deleted               Boolean           @default(false)
+  deleted_at            DateTime?
+  deleted_by            String?
+  created_at            DateTime          @default(now())
+  updated_at            DateTime
+  debates               debates           @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  debate_comments       debate_comments?  @relation("debate_commentsTodebate_comments", fields: [parent_id], references: [id], onDelete: Cascade)
+  other_debate_comments debate_comments[] @relation("debate_commentsTodebate_comments")
+  users                 users             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([debate_id, created_at], map: "DebateComment_debateId_createdAt_idx")
+  @@index([created_at])
+  @@index([debate_id])
+  @@index([parent_id])
+  @@index([user_id])
+}
+
+model debate_images {
+  id          String   @id
+  debate_id   String
+  url         String
+  alt         String?
+  caption     String?
+  order       Int      @default(0)
+  width       Int?
+  height      Int?
+  file_size   Int?
+  mime_type   String?
+  uploaded_by String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+  debates     debates  @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+
+  @@index([debate_id])
+  @@index([order])
+}
+
+model debate_likes {
+  id         String   @id
+  debate_id  String
+  user_id    String
+  created_at DateTime @default(now())
+  debates    debates  @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, user_id])
+  @@index([debate_id])
+  @@index([user_id])
+}
+
+model debate_participants {
+  id         String         @id
+  debate_id  String
+  user_id    String
+  position   DebatePosition
+  status     String         @default("INVITED")
+  joined_at  DateTime?
+  created_at DateTime       @default(now())
+  updated_at DateTime
+  debates    debates        @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users      users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, user_id])
+  @@index([debate_id])
+  @@index([status])
+  @@index([user_id])
+}
+
+model debate_saves {
+  id         String   @id
+  debate_id  String
+  user_id    String
+  created_at DateTime @default(now())
+  debates    debates  @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, user_id])
+  @@index([debate_id])
+  @@index([user_id])
+}
+
+model debate_shares {
+  id         String   @id
+  debate_id  String
+  user_id    String
+  method     String?
+  created_at DateTime @default(now())
+  debates    debates  @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([debate_id])
+  @@index([user_id])
+}
+
+model debate_tags {
+  id         String   @id
+  debate_id  String
+  tag_id     String
+  created_at DateTime @default(now())
+  debates    debates  @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  tags       tags     @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, tag_id])
+  @@index([debate_id])
+  @@index([tag_id])
+}
+
+model debates {
+  id                                 String                @id
+  topic                              String
+  description                        String?
+  category                           DebateCategory
+  challenger_id                      String
+  opponent_id                        String?
+  challenge_type                     String                @default("OPEN")
+  invited_user_ids                   String?
+  invited_by                         String?
+  challenger_position                DebatePosition
+  opponent_position                  DebatePosition
+  total_rounds                       Int                   @default(5)
+  current_round                      Int                   @default(1)
+  round_duration                     Int                   @default(86400000)
+  speed_mode                         Boolean               @default(false)
+  status                             DebateStatus          @default(WAITING)
+  winner_id                          String?
+  verdict_reached                    Boolean               @default(false)
+  verdict_date                       DateTime?
+  appealed_at                        DateTime?
+  appeal_status                      AppealStatus?
+  appeal_count                       Int                   @default(0)
+  appealed_by                        String?
+  original_winner_id                 String?
+  appeal_reason                      String?
+  appealed_statements                String?
+  appeal_rejection_reason            String?
+  rematch_requested_by               String?
+  rematch_requested_at               DateTime?
+  rematch_status                     RematchStatus?
+  original_debate_id                 String?
+  rematch_debate_id                  String?
+  spectator_count                    Int                   @default(0)
+  view_count                         Int                   @default(0)
+  featured                           Boolean               @default(false)
+  allow_copy_paste                   Boolean               @default(true)
+  is_private                         Boolean               @default(false)
+  share_token                        String?               @unique
+  challenger_elo_change              Int?
+  opponent_elo_change                Int?
+  started_at                         DateTime?
+  ended_at                           DateTime?
+  created_at                         DateTime              @default(now())
+  updated_at                         DateTime
+  round_deadline                     DateTime?
+  visibility                         DebateVisibility      @default(PRIVATE)
+  slug                               String?               @unique
+  belt_stake_type                    String?
+  has_belt_at_stake                  Boolean               @default(false)
+  api_usage                          api_usage[]
+  appeal_predictions                 appeal_predictions?
+  belt_challenges                    belt_challenges?
+  belt_history                       belt_history[]
+  belts                              belts?
+  chat_messages                      chat_messages[]
+  debate_comments                    debate_comments[]
+  debate_images                      debate_images[]
+  debate_likes                       debate_likes[]
+  debate_participants                debate_participants[]
+  debate_saves                       debate_saves[]
+  debate_shares                      debate_shares[]
+  debate_tags                        debate_tags[]
+  users_debates_challenger_idTousers users                 @relation("debates_challenger_idTousers", fields: [challenger_id], references: [id], onDelete: Cascade)
+  users_debates_opponent_idTousers   users?                @relation("debates_opponent_idTousers", fields: [opponent_id], references: [id])
+  notifications                      notifications[]
+  predictions                        predictions[]
+  reports                            reports[]
+  social_media_posts                 social_media_posts[]
+  statements                         statements[]
+  tournament_matches                 tournament_matches?
+  verdicts                           verdicts[]
+
+  @@index([category])
+  @@index([challenger_id])
+  @@index([challenger_id, status])
+  @@index([created_at])
+  @@index([opponent_id])
+  @@index([opponent_id, status])
+  @@index([slug])
+  @@index([status])
+  @@index([status, visibility])
+}
+
+model direct_messages {
+  id                                       String        @id
+  conversation_id                          String
+  sender_id                                String
+  receiver_id                              String
+  content                                  String
+  is_read                                  Boolean       @default(false)
+  read_at                                  DateTime?
+  deleted_by_sender                        Boolean       @default(false)
+  deleted_by_receiver                      Boolean       @default(false)
+  created_at                               DateTime      @default(now())
+  conversations                            conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users_direct_messages_receiver_idTousers users         @relation("direct_messages_receiver_idTousers", fields: [receiver_id], references: [id], onDelete: Cascade)
+  users_direct_messages_sender_idTousers   users         @relation("direct_messages_sender_idTousers", fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([created_at])
+  @@index([receiver_id])
+  @@index([sender_id])
+}
+
+model email_newsletters {
+  id                     String                  @id
+  strategy_id            String?
+  subject                String
+  content                String
+  html_content           String?
+  status                 String                  @default("DRAFT")
+  sent_at                DateTime?
+  recipient_count        Int?
+  open_rate              Float?
+  click_rate             Float?
+  calendar_item_id       String?                 @unique
+  created_at             DateTime                @default(now())
+  updated_at             DateTime
+  content_calendar_items content_calendar_items? @relation(fields: [calendar_item_id], references: [id])
+  marketing_strategies   marketing_strategies?   @relation(fields: [strategy_id], references: [id])
+
+  @@index([sent_at])
+  @@index([status])
+}
+
+model fcm_tokens {
+  id         String   @id
+  user_id    String
+  token      String   @unique
+  device     String?
+  user_agent String?
+  created_at DateTime @default(now())
+  updated_at DateTime
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model follows {
+  id                                String   @id
+  follower_id                       String
+  following_id                      String
+  created_at                        DateTime @default(now())
+  users_follows_follower_idTousers  users    @relation("follows_follower_idTousers", fields: [follower_id], references: [id], onDelete: Cascade)
+  users_follows_following_idTousers users    @relation("follows_following_idTousers", fields: [following_id], references: [id], onDelete: Cascade)
+
+  @@unique([follower_id, following_id])
+  @@index([follower_id])
+  @@index([following_id])
+}
+
+model homepage_buttons {
+  id                String            @id
+  section_id        String
+  text              String
+  url               String?
+  variant           String            @default("primary")
+  order             Int               @default(0)
+  is_visible        Boolean           @default(true)
+  created_at        DateTime          @default(now())
+  updated_at        DateTime
+  homepage_sections homepage_sections @relation(fields: [section_id], references: [id], onDelete: Cascade)
+
+  @@index([order])
+  @@index([section_id])
+}
+
+model homepage_images {
+  id                String            @id
+  section_id        String
+  url               String
+  alt               String?
+  caption           String?
+  link_url          String?
+  order             Int               @default(0)
+  width             Int?
+  height            Int?
+  file_size         Int?
+  mime_type         String?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime
+  image_position    String?           @default("left")
+  homepage_sections homepage_sections @relation(fields: [section_id], references: [id], onDelete: Cascade)
+
+  @@index([order])
+  @@index([section_id])
+}
+
+model homepage_sections {
+  id               String             @id
+  key              String             @unique
+  title            String?
+  content          String?
+  order            Int                @default(0)
+  is_visible       Boolean            @default(true)
+  contact_email    String?
+  meta_title       String?
+  meta_description String?
+  created_at       DateTime           @default(now())
+  updated_at       DateTime
+  homepage_buttons homepage_buttons[]
+  homepage_images  homepage_images[]
+
+  @@index([is_visible])
+  @@index([key])
+  @@index([order])
+}
+
+model impressions {
+  id           String       @id
+  contract_id  String
+  campaign_id  String
+  user_id      String?
+  ip_address   String
+  user_agent   String
+  referrer     String?
+  timestamp    DateTime     @default(now())
+  campaigns    campaigns    @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  ad_contracts ad_contracts @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+
+  @@index([campaign_id])
+  @@index([contract_id])
+  @@index([ip_address])
+  @@index([timestamp])
+}
+
+model judges {
+  id             String        @id
+  name           String        @unique
+  personality    String
+  emoji          String
+  description    String
+  system_prompt  String
+  debates_judged Int           @default(0)
+  created_at     DateTime      @default(now())
+  updated_at     DateTime
+  tournaments    tournaments[]
+  verdicts       verdicts[]
+}
+
+model legal_pages {
+  id               String   @id
+  slug             String   @unique
+  title            String
+  content          String
+  is_visible       Boolean  @default(true)
+  meta_title       String?
+  meta_description String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime
+
+  @@index([is_visible])
+  @@index([slug])
+}
+
+model lists {
+  id          String   @id
+  board_id    String
+  name        String
+  position    Int      @default(0)
+  is_archived Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+  cards       cards[]
+  boards      boards   @relation(fields: [board_id], references: [id], onDelete: Cascade)
+
+  @@index([board_id])
+  @@index([position])
+}
+
+model marketing_strategies {
+  id                     String                   @id
+  name                   String
+  description            String?
+  start_date             DateTime
+  end_date               DateTime
+  status                 String                   @default("DRAFT")
+  goals                  String?
+  themes                 String?
+  platforms              String?
+  frequency              String?
+  created_at             DateTime                 @default(now())
+  updated_at             DateTime
+  blog_posts             blog_posts[]
+  content_calendar_items content_calendar_items[]
+  email_newsletters      email_newsletters[]
+  social_media_posts     social_media_posts[]
+
+  @@index([start_date])
+  @@index([status])
+}
+
+model media_library {
+  id          String       @id
+  url         String       @unique
+  filename    String
+  alt         String?
+  caption     String?
+  width       Int?
+  height      Int?
+  file_size   Int
+  mime_type   String
+  used_in     String?
+  uploaded_by String?
+  uploaded_at DateTime     @default(now())
+  blog_posts  blog_posts[]
+
+  @@index([uploaded_at])
+  @@index([uploaded_by])
+  @@index([used_in])
+}
+
+model model_metrics {
+  id               String         @id
+  model_version_id String
+  metric_type      String
+  metric_value     Float
+  dataset          String?
+  period           String?
+  recorded_at      DateTime       @default(now())
+  notes            String?
+  model_versions   model_versions @relation(fields: [model_version_id], references: [id], onDelete: Cascade)
+
+  @@index([metric_type])
+  @@index([model_version_id])
+  @@index([recorded_at])
+}
+
+model model_versions {
+  id                                                   String               @id
+  name                                                 String
+  version                                              String
+  description                                          String?
+  model_type                                           String
+  config                                               String?
+  is_active                                            Boolean              @default(false)
+  is_default                                           Boolean              @default(false)
+  created_by                                           String?
+  created_at                                           DateTime             @default(now())
+  updated_at                                           DateTime
+  ab_tests_ab_tests_model_version_a_idTomodel_versions ab_tests[]           @relation("ab_tests_model_version_a_idTomodel_versions")
+  ab_tests_ab_tests_model_version_b_idTomodel_versions ab_tests[]           @relation("ab_tests_model_version_b_idTomodel_versions")
+  appeal_predictions                                   appeal_predictions[]
+  model_metrics                                        model_metrics[]
+  users                                                users?               @relation(fields: [created_by], references: [id])
+
+  @@unique([name, version])
+  @@index([is_active])
+  @@index([model_type])
+}
+
+model notifications {
+  id         String           @id
+  user_id    String
+  type       NotificationType
+  title      String
+  message    String
+  debate_id  String?
+  read       Boolean          @default(false)
+  read_at    DateTime?
+  created_at DateTime         @default(now())
+  debates    debates?         @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users      users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([created_at])
+  @@index([read])
+  @@index([user_id])
+  @@index([user_id, read])
+}
+
+model offers {
+  id                String        @id
+  advertiser_id     String
+  campaign_id       String
+  creator_id        String
+  placement         PlacementType
+  duration          Int
+  payment_type      PaymentType
+  amount            Decimal       @db.Decimal(10, 2)
+  cpc_rate          Decimal?      @db.Decimal(10, 2)
+  cpm_rate          Decimal?      @db.Decimal(10, 2)
+  message           String?
+  status            OfferStatus   @default(PENDING)
+  counter_amount    Decimal?      @db.Decimal(10, 2)
+  counter_message   String?
+  negotiation_round Int           @default(0)
+  created_at        DateTime      @default(now())
+  expires_at        DateTime
+  responded_at      DateTime?
+  ad_contracts      ad_contracts?
+  advertisers       advertisers   @relation(fields: [advertiser_id], references: [id], onDelete: Cascade)
+  campaigns         campaigns     @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  users             users         @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@index([advertiser_id])
+  @@index([creator_id])
+  @@index([expires_at])
+  @@index([status])
+}
+
+model password_reset_tokens {
+  id         String    @id
+  email      String
+  token      String    @unique
+  expires_at DateTime
+  created_at DateTime  @default(now())
+  used_at    DateTime?
+
+  @@index([email])
+  @@index([expires_at])
+  @@index([token])
+}
+
+model predictions {
+  id                  String   @id
+  debate_id           String
+  user_id             String
+  predicted_winner_id String
+  confidence          Int
+  correct             Boolean?
+  points              Int?
+  created_at          DateTime @default(now())
+  debates             debates  @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users               users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, user_id])
+  @@index([user_id])
+}
+
+model promo_codes {
+  id                 String               @id
+  code               String               @unique
+  description        String?
+  discountType       String
+  discountValue      Decimal              @db.Decimal(10, 2)
+  max_uses           Int?
+  current_uses       Int                  @default(0)
+  valid_from         DateTime
+  valid_until        DateTime?
+  applicableTo       String               @default("PRO")
+  billing_cycles     String?
+  is_active          Boolean              @default(true)
+  created_at         DateTime             @default(now())
+  updated_at         DateTime
+  created_by         String?
+  user_subscriptions user_subscriptions[]
+
+  @@index([code])
+  @@index([is_active])
+  @@index([valid_until])
+}
+
+model reports {
+  id              String       @id
+  debate_id       String?
+  reporter_id     String
+  reason          String
+  description     String?
+  status          ReportStatus @default(PENDING)
+  reviewed_by     String?
+  reviewed_at     DateTime?
+  resolution      String?
+  ai_moderated    Boolean      @default(false)
+  ai_action       String?
+  ai_confidence   Int?
+  ai_reasoning    String?
+  ai_severity     String?
+  ai_moderated_at DateTime?
+  created_at      DateTime     @default(now())
+  debates         debates?     @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  users           users        @relation(fields: [reporter_id], references: [id], onDelete: Cascade)
+
+  @@index([ai_moderated])
+  @@index([status])
+}
+
+model seed_debates {
+  id              String         @id
+  topic           String
+  category        DebateCategory
+  challenger_name String
+  opponent_name   String
+  statements      String
+  verdict_data    String
+  featured        Boolean        @default(false)
+  created_at      DateTime       @default(now())
+
+  @@index([category])
+}
+
+model seo_audits {
+  id                String   @id @default(dbgenerated("gen_random_uuid()"))
+  overall_score     Int
+  technical_score   Int
+  content_score     Int
+  performance_score Int
+  geo_score         Int
+  total_issues      Int      @default(0)
+  critical_issues   Int      @default(0)
+  warning_issues    Int      @default(0)
+  info_issues       Int      @default(0)
+  results           Json
+  run_by            String?
+  created_at        DateTime @default(now())
+
+  @@index([created_at])
+}
+
+model seo_recommendations {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  category    String
+  severity    String
+  title       String
+  description String
+  impact      String?
+  effort      String?
+  status      String    @default("pending")
+  page_url    String?
+  metadata    Json?
+  audit_id    String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  resolved_at DateTime?
+  resolved_by String?
+
+  @@index([category])
+  @@index([severity])
+  @@index([status])
+}
+
+model sessions {
+  id                  String   @id
+  user_id             String
+  token               String   @unique
+  expires_at          DateTime
+  created_at          DateTime @default(now())
+  two_factor_verified Boolean  @default(false)
+  users               users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([user_id])
+}
+
+model social_media_links {
+  id         String   @id
+  platform   String   @unique
+  url        String
+  order      Int      @default(0)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime
+
+  @@index([is_active])
+  @@index([order])
+  @@index([platform])
+}
+
+model social_media_posts {
+  id                     String                  @id
+  debate_id              String?
+  platform               String
+  content                String
+  image_prompt           String?
+  hashtags               String?
+  status                 String                  @default("DRAFT")
+  scheduled_at           DateTime?
+  created_at             DateTime                @default(now())
+  updated_at             DateTime
+  calendar_item_id       String?                 @unique
+  published_at           DateTime?
+  strategy_id            String?
+  content_analytics      content_analytics[]
+  content_calendar_items content_calendar_items? @relation(fields: [calendar_item_id], references: [id])
+  debates                debates?                @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  marketing_strategies   marketing_strategies?   @relation(fields: [strategy_id], references: [id])
+
+  @@index([debate_id])
+  @@index([platform])
+  @@index([scheduled_at])
+  @@index([status])
+}
+
+model statements {
+  id              String    @id
+  debate_id       String
+  author_id       String
+  round           Int
+  content         String
+  flagged         Boolean   @default(false)
+  flagged_reason  String?
+  moderated_at    DateTime?
+  ai_moderated    Boolean   @default(false)
+  ai_action       String?
+  ai_confidence   Int?
+  ai_reasoning    String?
+  ai_severity     String?
+  ai_moderated_at DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime
+  users           users     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  debates         debates   @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, author_id, round])
+  @@index([author_id])
+  @@index([debate_id])
+}
+
+model static_pages {
+  id               String   @id
+  slug             String   @unique
+  title            String
+  content          String
+  is_visible       Boolean  @default(true)
+  meta_title       String?
+  meta_description String?
+  keywords         String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime
+
+  @@index([is_visible])
+  @@index([slug])
+}
+
+model subscription_plans {
+  id                String   @id
+  name              String
+  description       String?
+  price             Decimal  @db.Decimal(10, 2)
+  billingCycle      String
+  features          String
+  appeal_limit      Int?
+  debate_limit      Int?
+  priority_support  Boolean  @default(false)
+  custom_badge      String?
+  stripe_price_id   String?  @unique
+  stripe_product_id String?
+  is_active         Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime
+
+  @@index([billingCycle])
+  @@index([is_active])
+}
+
+model support_ticket_replies {
+  id              String          @id
+  ticket_id       String
+  author_id       String
+  content         String
+  is_internal     Boolean         @default(false)
+  created_at      DateTime        @default(now())
+  users           users           @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  support_tickets support_tickets @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+
+  @@index([author_id])
+  @@index([created_at])
+  @@index([ticket_id])
+}
+
+model support_tickets {
+  id                                          String                   @id
+  user_id                                     String
+  subject                                     String
+  description                                 String
+  category                                    String?
+  status                                      SupportTicketStatus      @default(OPEN)
+  priority                                    SupportTicketPriority    @default(MEDIUM)
+  assigned_to_id                              String?
+  created_at                                  DateTime                 @default(now())
+  updated_at                                  DateTime
+  resolved_at                                 DateTime?
+  closed_at                                   DateTime?
+  support_ticket_replies                      support_ticket_replies[]
+  users_support_tickets_assigned_to_idTousers users?                   @relation("support_tickets_assigned_to_idTousers", fields: [assigned_to_id], references: [id])
+  users_support_tickets_user_idTousers        users                    @relation("support_tickets_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([assigned_to_id])
+  @@index([created_at])
+  @@index([status])
+  @@index([user_id])
+}
+
+model tags {
+  id          String        @id
+  name        String        @unique
+  color       String        @default("#00aaff")
+  usage_count Int           @default(0)
+  created_at  DateTime      @default(now())
+  debate_tags debate_tags[]
+
+  @@index([name])
+  @@index([usage_count])
+}
+
+model tax_form_1099 {
+  id                  String           @id
+  creator_tax_info_id String
+  tax_year            Int
+  total_compensation  Decimal
+  status              String           @default("GENERATED")
+  pdf_url             String?
+  generated_at        DateTime?
+  sent_to_creator     Boolean          @default(false)
+  sent_at             DateTime?
+  filed_with_irs      Boolean          @default(false)
+  filed_at            DateTime?
+  irs_filing_id       String?
+  created_at          DateTime         @default(now())
+  updated_at          DateTime
+  creator_tax_info    creator_tax_info @relation(fields: [creator_tax_info_id], references: [id], onDelete: Cascade)
+
+  @@unique([creator_tax_info_id, tax_year])
+}
+
+model tournament_matches {
+  id                                                                                  String                   @id
+  tournament_id                                                                       String
+  round_id                                                                            String
+  participant1_id                                                                     String
+  participant2_id                                                                     String
+  debate_id                                                                           String?                  @unique
+  winner_id                                                                           String?
+  status                                                                              MatchStatus              @default(SCHEDULED)
+  scheduled_at                                                                        DateTime?
+  completed_at                                                                        DateTime?
+  participant1_score                                                                  Int?
+  participant2_score                                                                  Int?
+  participant1_score_breakdown                                                        Json?
+  participant2_score_breakdown                                                        Json?
+  debates                                                                             debates?                 @relation(fields: [debate_id], references: [id])
+  tournament_participants_tournament_matches_participant1_idTotournament_participants tournament_participants  @relation("tournament_matches_participant1_idTotournament_participants", fields: [participant1_id], references: [id])
+  tournament_participants_tournament_matches_participant2_idTotournament_participants tournament_participants  @relation("tournament_matches_participant2_idTotournament_participants", fields: [participant2_id], references: [id])
+  tournament_rounds                                                                   tournament_rounds        @relation(fields: [round_id], references: [id])
+  tournaments                                                                         tournaments              @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  tournament_participants_tournament_matches_winner_idTotournament_participants       tournament_participants? @relation("tournament_matches_winner_idTotournament_participants", fields: [winner_id], references: [id])
+
+  @@index([debate_id])
+  @@index([round_id])
+  @@index([tournament_id])
+}
+
+model tournament_participants {
+  id                                                                             String               @id
+  tournament_id                                                                  String
+  user_id                                                                        String
+  seed                                                                           Int?
+  current_seed                                                                   Int?
+  wins                                                                           Int                  @default(0)
+  losses                                                                         Int                  @default(0)
+  elo_at_start                                                                   Int
+  status                                                                         ParticipantStatus    @default(REGISTERED)
+  eliminated_at                                                                  DateTime?
+  registered_at                                                                  DateTime             @default(now())
+  selected_position                                                              String?
+  cumulative_score                                                               Int?
+  elimination_round                                                              Int?
+  elimination_reason                                                             String?
+  tournament_matches_tournament_matches_participant1_idTotournament_participants tournament_matches[] @relation("tournament_matches_participant1_idTotournament_participants")
+  tournament_matches_tournament_matches_participant2_idTotournament_participants tournament_matches[] @relation("tournament_matches_participant2_idTotournament_participants")
+  tournament_matches_tournament_matches_winner_idTotournament_participants       tournament_matches[] @relation("tournament_matches_winner_idTotournament_participants")
+  tournaments                                                                    tournaments          @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  users                                                                          users                @relation(fields: [user_id], references: [id])
+
+  @@unique([tournament_id, user_id])
+  @@index([tournament_id])
+  @@index([user_id])
+}
+
+model tournament_rounds {
+  id                 String               @id
+  tournament_id      String
+  round_number       Int
+  status             RoundStatus          @default(UPCOMING)
+  start_date         DateTime?
+  end_date           DateTime?
+  tournament_matches tournament_matches[]
+  tournaments        tournaments          @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+
+  @@unique([tournament_id, round_number])
+  @@index([tournament_id])
+}
+
+model tournament_subscriptions {
+  id                     String             @id
+  user_id                String             @unique
+  stripe_subscription_id String?            @unique
+  stripe_customer_id     String?
+  status                 SubscriptionStatus @default(ACTIVE)
+  current_period_start   DateTime
+  current_period_end     DateTime
+  created_at             DateTime           @default(now())
+  updated_at             DateTime
+  cancelled_at           DateTime?
+  users                  users              @relation(fields: [user_id], references: [id])
+
+  @@index([status])
+  @@index([user_id])
+}
+
+model tournaments {
+  id                                               String                    @id
+  name                                             String
+  description                                      String?
+  creator_id                                       String
+  max_participants                                 Int                       @default(16)
+  current_round                                    Int                       @default(1)
+  total_rounds                                     Int
+  status                                           TournamentStatus          @default(UPCOMING)
+  min_elo                                          Int?
+  judge_id                                         String?
+  start_date                                       DateTime
+  end_date                                         DateTime?
+  round_duration                                   Int
+  reseed_after_round                               Boolean                   @default(true)
+  reseed_method                                    ReseedMethod              @default(ELO_BASED)
+  created_at                                       DateTime                  @default(now())
+  updated_at                                       DateTime
+  is_private                                       Boolean                   @default(false)
+  invited_user_ids                                 String?
+  format                                           TournamentFormat          @default(BRACKET)
+  assigned_judges                                  String?
+  belt_creation_cost                               Int?
+  belt_created_by                                  String?
+  belt_created                                     Boolean                   @default(false)
+  prize_pool                                       Int?
+  prize_distribution                               String?
+  entry_fee                                        Int?
+  winner_id                                        String?
+  belt_history                                     belt_history[]
+  belts_belts_staked_in_tournament_idTotournaments belts[]                   @relation("belts_staked_in_tournament_idTotournaments")
+  belts_belts_tournament_idTotournaments           belts?                    @relation("belts_tournament_idTotournaments")
+  tournament_matches                               tournament_matches[]
+  tournament_participants                          tournament_participants[]
+  tournament_rounds                                tournament_rounds[]
+  users_tournaments_creator_idTousers              users                     @relation("tournaments_creator_idTousers", fields: [creator_id], references: [id])
+  judges                                           judges?                   @relation(fields: [judge_id], references: [id])
+  users_tournaments_winner_idTousers               users?                    @relation("tournaments_winner_idTousers", fields: [winner_id], references: [id])
+
+  @@index([creator_id])
+  @@index([status])
+  @@index([status, start_date])
+}
+
+model usage_tracking {
+  id           String   @id
+  user_id      String
+  featureType  String
+  count        Int      @default(0)
+  period_start DateTime
+  period_end   DateTime
+  periodType   String   @default("MONTHLY")
+  created_at   DateTime @default(now())
+  updated_at   DateTime
+  users        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, featureType, period_start])
+  @@index([featureType])
+  @@index([period_start])
+  @@index([user_id])
+}
+
+model user_subscriptions {
+  id                     String       @id
+  user_id                String       @unique
+  tier                   String
+  billingCycle           String?
+  status                 String       @default("ACTIVE")
+  current_period_start   DateTime?
+  current_period_end     DateTime?
+  stripe_customer_id     String?      @unique
+  stripe_subscription_id String?      @unique
+  stripe_price_id        String?
+  promo_code_id          String?
+  cancel_at_period_end   Boolean      @default(false)
+  cancelled_at           DateTime?
+  created_at             DateTime     @default(now())
+  updated_at             DateTime
+  promo_codes            promo_codes? @relation(fields: [promo_code_id], references: [id])
+  users                  users        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([tier])
+  @@index([user_id])
+}
+
+model users {
+  id                                                    String                    @id
+  email                                                 String                    @unique
+  username                                              String                    @unique
+  password_hash                                         String?
+  avatar_url                                            String?
+  bio                                                   String?
+  elo_rating                                            Int                       @default(1200)
+  debates_won                                           Int                       @default(0)
+  debates_lost                                          Int                       @default(0)
+  debates_tied                                          Int                       @default(0)
+  total_debates                                         Int                       @default(0)
+  total_score                                           Int                       @default(0)
+  total_max_score                                       Int                       @default(0)
+  total_word_count                                      Int                       @default(0)
+  total_statements                                      Int                       @default(0)
+  average_word_count                                    Float                     @default(0)
+  average_rounds                                        Float                     @default(0)
+  is_admin                                              Boolean                   @default(false)
+  is_banned                                             Boolean                   @default(false)
+  employee_role                                         String?
+  access_level                                          String?
+  is_creator                                            Boolean                   @default(false)
+  creatorStatus                                         CreatorStatus?
+  creator_since                                         DateTime?
+  profile_banner_available                              Boolean                   @default(true)
+  post_debate_available                                 Boolean                   @default(true)
+  debate_widget_available                               Boolean                   @default(true)
+  profile_banner_price                                  Decimal?                  @db.Decimal(10, 2)
+  post_debate_price                                     Decimal?                  @db.Decimal(10, 2)
+  debate_widget_price                                   Decimal?                  @db.Decimal(10, 2)
+  avg_monthly_views                                     Int                       @default(0)
+  avg_debate_views                                      Int                       @default(0)
+  follower_count                                        Int                       @default(0)
+  profile_visits                                        Int                       @default(0)
+  created_at                                            DateTime                  @default(now())
+  updated_at                                            DateTime
+  strikes                                               Int                       @default(0)
+  banned_until                                          DateTime?
+  ban_reason                                            String?
+  ranked_banned                                         Boolean                   @default(false)
+  ai_paused                                             Boolean                   @default(false)
+  ai_personality                                        String?
+  ai_response_delay                                     Int?
+  is_ai                                                 Boolean                   @default(false)
+  google_auth_enabled                                   Boolean                   @default(false)
+  google_email                                          String?
+  google_id                                             String?                   @unique
+  google_picture                                        String?
+  totp_backup_codes                                     String?
+  totp_enabled                                          Boolean                   @default(false)
+  totp_secret                                           String?
+  total_belt_defenses                                   Int                       @default(0)
+  longest_belt_held                                     Int                       @default(0)
+  current_belts_count                                   Int                       @default(0)
+  total_belt_wins                                       Int                       @default(0)
+  coins                                                 Int                       @default(0)
+  free_belt_challenges_available                        Int                       @default(1)
+  last_free_challenge_reset                             DateTime?
+  consecutive_login_days                                Int?                      @default(0)
+  last_daily_reward_date                                DateTime?
+  last_login_date                                       DateTime?
+  longest_login_streak                                  Int?                      @default(0)
+  total_login_days                                      Int?                      @default(0)
+  ad_contracts                                          ad_contracts[]
+  api_usage                                             api_usage[]
+  appeal_limits                                         appeal_limits?
+  appeal_subscriptions                                  appeal_subscriptions[]
+  belt_challenges_belt_challenges_belt_holder_idTousers belt_challenges[]         @relation("belt_challenges_belt_holder_idTousers")
+  belt_challenges_belt_challenges_challenger_idTousers  belt_challenges[]         @relation("belt_challenges_challenger_idTousers")
+  belt_history_belt_history_from_user_idTousers         belt_history[]            @relation("belt_history_from_user_idTousers")
+  belt_history_belt_history_to_user_idTousers           belt_history[]            @relation("belt_history_to_user_idTousers")
+  belts                                                 belts[]
+  blog_posts                                            blog_posts[]
+  card_members                                          card_members[]
+  chat_messages                                         chat_messages[]
+  coin_transactions                                     coin_transactions[]
+  conversations_conversations_user1_idTousers           conversations[]           @relation("conversations_user1_idTousers")
+  conversations_conversations_user2_idTousers           conversations[]           @relation("conversations_user2_idTousers")
+  creator_tax_info                                      creator_tax_info?
+  debate_comments                                       debate_comments[]
+  debate_likes                                          debate_likes[]
+  debate_participants                                   debate_participants[]
+  debate_saves                                          debate_saves[]
+  debate_shares                                         debate_shares[]
+  debates_debates_challenger_idTousers                  debates[]                 @relation("debates_challenger_idTousers")
+  debates_debates_opponent_idTousers                    debates[]                 @relation("debates_opponent_idTousers")
+  direct_messages_direct_messages_receiver_idTousers    direct_messages[]         @relation("direct_messages_receiver_idTousers")
+  direct_messages_direct_messages_sender_idTousers      direct_messages[]         @relation("direct_messages_sender_idTousers")
+  fcm_tokens                                            fcm_tokens[]
+  follows_follows_follower_idTousers                    follows[]                 @relation("follows_follower_idTousers")
+  follows_follows_following_idTousers                   follows[]                 @relation("follows_following_idTousers")
+  model_versions                                        model_versions[]
+  notifications                                         notifications[]
+  offers                                                offers[]
+  predictions                                           predictions[]
+  reports                                               reports[]
+  sessions                                              sessions[]
+  statements                                            statements[]
+  support_ticket_replies                                support_ticket_replies[]
+  support_tickets_support_tickets_assigned_to_idTousers support_tickets[]         @relation("support_tickets_assigned_to_idTousers")
+  support_tickets_support_tickets_user_idTousers        support_tickets[]         @relation("support_tickets_user_idTousers")
+  tournament_participants                               tournament_participants[]
+  tournament_subscriptions                              tournament_subscriptions?
+  tournaments_tournaments_creator_idTousers             tournaments[]             @relation("tournaments_creator_idTousers")
+  tournaments_tournaments_winner_idTousers              tournaments[]             @relation("tournaments_winner_idTousers")
+  usage_tracking                                        usage_tracking[]
+  user_subscriptions                                    user_subscriptions?
+
+  @@index([coins], map: "User_coins_idx")
+  @@index([is_admin], map: "User_isAdmin_idx")
+  @@index([is_banned], map: "User_isBanned_idx")
+  @@index([elo_rating])
+  @@index([email])
+  @@index([username])
+}
+
+model verdicts {
+  id               String          @id
+  debate_id        String
+  judge_id         String
+  winner_id        String?
+  decision         VerdictDecision
+  reasoning        String
+  challenger_score Int?
+  opponent_score   Int?
+  created_at       DateTime        @default(now())
+  debates          debates         @relation(fields: [debate_id], references: [id], onDelete: Cascade)
+  judges           judges          @relation(fields: [judge_id], references: [id], onDelete: Cascade)
+
+  @@unique([debate_id, judge_id])
+  @@index([debate_id])
+}
+
+model waiting_list {
+  id            String    @id
+  email         String    @unique
+  username      String    @unique
+  password_hash String
+  position      Int
+  notified      Boolean   @default(false)
+  approved      Boolean   @default(false)
+  approved_at   DateTime?
+  approved_by   String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime
+
+  @@index([approved])
+  @@index([email])
+  @@index([position])
+}
+
+enum AdvertiserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+  BANNED
+}
+
+enum AppealStatus {
+  PENDING
+  PROCESSING
+  RESOLVED
+  DENIED
+}
+
+enum BeltStatus {
+  ACTIVE
+  INACTIVE
+  VACANT
+  STAKED
+  GRACE_PERIOD
+  MANDATORY
+}
+
+enum BeltTransferReason {
+  DEBATE_WIN
+  TOURNAMENT_WIN
+  MANDATORY_LOSS
+  INACTIVITY
+  ADMIN_TRANSFER
+  CHALLENGE_WIN
+  FORFEIT
+}
+
+enum BeltType {
+  ROOKIE
+  CATEGORY
+  CHAMPIONSHIP
+  UNDEFEATED
+  TOURNAMENT
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum CampaignStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+  PENDING_PAYMENT
+}
+
+enum CampaignType {
+  PLATFORM_ADS
+  CREATOR_SPONSORSHIP
+  TOURNAMENT_SPONSORSHIP
+}
+
+enum ChallengeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+  COMPLETED
+}
+
+enum CoinTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum CoinTransactionType {
+  BELT_CHALLENGE_ENTRY
+  BELT_CHALLENGE_REWARD
+  BELT_CHALLENGE_CONSOLATION
+  BELT_TOURNAMENT_CREATION
+  BELT_TOURNAMENT_REWARD
+  ADMIN_GRANT
+  ADMIN_DEDUCT
+  REFUND
+  PLATFORM_FEE
+  COIN_PURCHASE
+  COIN_PURCHASE_REFUND
+  DAILY_LOGIN_REWARD
+}
+
+enum ContractStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum CreatorStatus {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum DebateCategory {
+  SPORTS
+  POLITICS
+  TECH
+  ENTERTAINMENT
+  SCIENCE
+  MUSIC
+  OTHER
+}
+
+enum DebatePosition {
+  FOR
+  AGAINST
+}
+
+enum DebateStatus {
+  WAITING
+  ACTIVE
+  COMPLETED
+  VERDICT_READY
+  APPEALED
+  CANCELLED
+}
+
+enum DebateVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  FORFEITED
+}
+
+enum NotificationType {
+  DEBATE_TURN
+  DEBATE_ACCEPTED
+  ROUND_ENDING
+  VERDICT_READY
+  DEBATE_WON
+  DEBATE_LOST
+  DEBATE_TIED
+  NEW_CHALLENGE
+  OPPONENT_SUBMITTED
+  DEBATE_INVITATION
+  DEBATE_GROUP_INVITATION
+  REMATCH_REQUESTED
+  REMATCH_ACCEPTED
+  REMATCH_DECLINED
+  NEW_MESSAGE
+  BELT_CHALLENGE
+  BELT_CHALLENGE_ACCEPTED
+  BELT_MANDATORY_DEFENSE
+  BELT_INACTIVE
+  BELT_TRANSFER
+  OTHER
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COUNTERED
+  EXPIRED
+}
+
+enum ParticipantStatus {
+  REGISTERED
+  ACTIVE
+  ELIMINATED
+  DISQUALIFIED
+}
+
+enum PaymentType {
+  FLAT_RATE
+  PAY_PER_CLICK
+  PAY_PER_IMPRESSION
+  PERFORMANCE_BONUS
+  REVENUE_SHARE
+}
+
+enum PlacementType {
+  PROFILE_BANNER
+  POST_DEBATE
+  DEBATE_WIDGET
+  EMAIL_SHOUTOUT
+  DEBATE_SPONSORSHIP
+}
+
+enum RematchStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum ReseedMethod {
+  ELO_BASED
+  TOURNAMENT_WINS
+  RANDOM
+}
+
+enum RoundStatus {
+  UPCOMING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TournamentFormat {
+  BRACKET
+  CHAMPIONSHIP
+  KING_OF_THE_HILL
+}
+
+enum TournamentStatus {
+  UPCOMING
+  REGISTRATION_OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum VerdictDecision {
+  CHALLENGER_WINS
+  OPPONENT_WINS
+  TIE
+}

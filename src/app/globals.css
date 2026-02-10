@@ -1,0 +1,259 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* shadcn/ui semantic colors */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ArguFight Cyberpunk Accent Colors */
+  --color-electric-blue: #00d9ff;
+  --color-neon-orange: #ff6b35;
+  --color-hot-pink: #ff006e;
+  --color-cyber-green: #00ff94;
+
+  /* ArguFight theme-aware variables */
+  --color-bg-primary: var(--af-bg-primary);
+  --color-bg-secondary: var(--af-bg-secondary);
+  --color-bg-tertiary: var(--af-bg-tertiary);
+  --color-text-primary: var(--af-text-primary);
+  --color-text-secondary: var(--af-text-secondary);
+  --color-text-muted: var(--af-text-muted);
+  --color-af-border: var(--af-border);
+}
+
+/* ==========================================
+   DARK THEME (Default) — Cyberpunk Black
+   ========================================== */
+:root {
+  --radius: 0.625rem;
+
+  /* shadcn/ui dark-first design */
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0a0a0a;
+  --card-foreground: #ffffff;
+  --popover: #0a0a0a;
+  --popover-foreground: #ffffff;
+  --primary: #00d9ff;
+  --primary-foreground: #000000;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #666666;
+  --accent: #1a1a1a;
+  --accent-foreground: #ffffff;
+  --destructive: #ff006e;
+  --border: #1a1a1a;
+  --input: #1a1a1a;
+  --ring: #00d9ff;
+  --chart-1: #00d9ff;
+  --chart-2: #ff6b35;
+  --chart-3: #00ff94;
+  --chart-4: #ff006e;
+  --chart-5: #a855f7;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #00d9ff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a1a1a;
+  --sidebar-ring: #00d9ff;
+
+  /* ArguFight theme variables */
+  --af-bg-primary: #000000;
+  --af-bg-secondary: #0a0a0a;
+  --af-bg-tertiary: #1a1a1a;
+  --af-text-primary: #ffffff;
+  --af-text-secondary: #a0a0a0;
+  --af-text-muted: #666666;
+  --af-border: #1a1a1a;
+}
+
+/* ==========================================
+   LIGHT THEME — Cream
+   ========================================== */
+.light {
+  --background: #faf8f3;
+  --foreground: #1a1a1a;
+  --card: #f5f2eb;
+  --card-foreground: #1a1a1a;
+  --popover: #f5f2eb;
+  --popover-foreground: #1a1a1a;
+  --primary: #0099b3;
+  --primary-foreground: #ffffff;
+  --secondary: #ebe8e0;
+  --secondary-foreground: #1a1a1a;
+  --muted: #ebe8e0;
+  --muted-foreground: #4a4a4a;
+  --accent: #ebe8e0;
+  --accent-foreground: #1a1a1a;
+  --destructive: #dc2626;
+  --border: #d4d0c4;
+  --input: #d4d0c4;
+  --ring: #0099b3;
+  --chart-1: #0099b3;
+  --chart-2: #e05a2c;
+  --chart-3: #00b36b;
+  --chart-4: #dc2626;
+  --chart-5: #9333ea;
+  --sidebar: #f5f2eb;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #0099b3;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ebe8e0;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #d4d0c4;
+  --sidebar-ring: #0099b3;
+
+  --af-bg-primary: #faf8f3;
+  --af-bg-secondary: #f5f2eb;
+  --af-bg-tertiary: #ebe8e0;
+  --af-text-primary: #1a1a1a;
+  --af-text-secondary: #2a2a2a;
+  --af-text-muted: #4a4a4a;
+  --af-border: #d4d0c4;
+}
+
+/* ==========================================
+   PURPLE THEME
+   ========================================== */
+.purple {
+  --background: #2d1b3d;
+  --foreground: #ffffff;
+  --card: #3d2b4d;
+  --card-foreground: #ffffff;
+  --popover: #3d2b4d;
+  --popover-foreground: #ffffff;
+  --primary: #a855f7;
+  --primary-foreground: #ffffff;
+  --secondary: #4d3b5d;
+  --secondary-foreground: #ffffff;
+  --muted: #4d3b5d;
+  --muted-foreground: #a080b0;
+  --accent: #4d3b5d;
+  --accent-foreground: #ffffff;
+  --destructive: #ff006e;
+  --border: #5d4b6d;
+  --input: #5d4b6d;
+  --ring: #a855f7;
+  --chart-1: #a855f7;
+  --chart-2: #00d9ff;
+  --chart-3: #00ff94;
+  --chart-4: #ff006e;
+  --chart-5: #ff6b35;
+  --sidebar: #3d2b4d;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #a855f7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #4d3b5d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #5d4b6d;
+  --sidebar-ring: #a855f7;
+
+  --af-bg-primary: #2d1b3d;
+  --af-bg-secondary: #3d2b4d;
+  --af-bg-tertiary: #4d3b5d;
+  --af-text-primary: #ffffff;
+  --af-text-secondary: #c0a0d0;
+  --af-text-muted: #a080b0;
+  --af-border: #5d4b6d;
+}
+
+/* ==========================================
+   BASE STYLES
+   ========================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--af-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--af-bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--af-text-muted);
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
