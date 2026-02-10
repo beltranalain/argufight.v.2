@@ -2,57 +2,65 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-
-const navLinks = [
-  { href: "/blog", label: "Blog" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/advertise", label: "Advertise" },
-];
 
 export function PublicNav() {
   const pathname = usePathname();
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-1 text-xl font-bold">
-          <span className="text-electric-blue">ARGU</span>
-          <span className="text-neon-orange">FIGHT</span>
-        </Link>
-
-        {/* Center Links (hidden on mobile) */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-purple-950/80 backdrop-blur-md border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="text-2xl font-bold text-[#00d9ff]">
+              ARGU FIGHT
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4">
             <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-electric-blue ${
-                pathname === link.href
-                  ? "text-electric-blue"
-                  : "text-muted-foreground"
+              href="/blog"
+              className={`px-3 py-2 md:px-4 md:py-2 text-sm md:text-base font-medium transition-colors ${
+                pathname === "/blog"
+                  ? "text-[#00d9ff]"
+                  : "text-white hover:text-[#00d9ff]"
               }`}
             >
-              {link.label}
+              Blog
             </Link>
-          ))}
-        </nav>
-
-        {/* Auth Buttons */}
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
-          <Button
-            size="sm"
-            className="bg-electric-blue text-black hover:bg-electric-blue/90"
-            asChild
-          >
-            <Link href="/signup">Sign Up</Link>
-          </Button>
+            <Link
+              href="/leaderboard"
+              className={`px-3 py-2 md:px-4 md:py-2 text-sm md:text-base font-medium transition-colors ${
+                pathname === "/leaderboard"
+                  ? "text-[#00d9ff]"
+                  : "text-white hover:text-[#00d9ff]"
+              }`}
+            >
+              Leaderboard
+            </Link>
+            <Link
+              href="/advertise"
+              className={`px-3 py-2 md:px-4 md:py-2 text-sm md:text-base font-medium transition-colors ${
+                pathname === "/advertise"
+                  ? "text-[#00d9ff]"
+                  : "text-white hover:text-[#00d9ff]"
+              }`}
+            >
+              Advertiser
+            </Link>
+            <Link
+              href="/login"
+              className="px-3 py-2 md:px-4 md:py-2 text-sm md:text-base text-white hover:text-[#00d9ff] transition-colors"
+            >
+              Login
+            </Link>
+            <Link
+              href="/signup"
+              className="px-4 py-2 md:px-6 md:py-2 text-sm md:text-base bg-[#00d9ff] text-black rounded-lg font-semibold hover:bg-[#00B8E6] transition-colors"
+            >
+              Sign Up
+            </Link>
+          </div>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
